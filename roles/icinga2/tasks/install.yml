@@ -1,7 +1,7 @@
 ---
-- name: Check supported operatingsystems
+- name: Install Icinga if OS is supported
   block:
-    - name: Install on {{ ansible_os_family }}
+    - name: Import install task using {{ ansible_os_family }}
       ansible.builtin.include_tasks: "install_on_{{ ansible_os_family }}.yml"
   rescue:
     - name: "OS family not supported!"
