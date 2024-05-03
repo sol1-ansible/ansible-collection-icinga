@@ -110,13 +110,15 @@
       copy:
         src: "/tmp/icinga2_ca.key"
         dest: "{{ icinga2_ca_path }}/ca.key"
-      when: inventory_hostname != groups['icinga_headends'][0]
+      delegate_to: "{{ groups['icinga_headends'][1] }}"
+      run_once: true
 
     - name: Distribute ca.crt to all other hosts in icinga_headends
       copy:
         src: "/tmp/icinga2_ca.key"
         dest: "{{ icinga2_ca_path }}/ca.crt"
-      when: inventory_hostname != groups['icinga_headends'][0]
+      delegate_to: "{{ groups['icinga_headends'][1] }}"
+      run_once: true
   when: icinga_ha | bool
 
 - name: check cert key already exists
