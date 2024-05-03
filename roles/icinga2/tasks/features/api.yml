@@ -83,7 +83,7 @@
     - name: create CA
       shell: >
         icinga2 pki new-ca
-      delegate_to: "{{ groups['icinga_headends'][0] }}"
+      delegate_to: "{{ groups['dynamic_icinga_headend_group'][0] }}"
       when: icinga2_ca_cert_path.stat.exists == false and icinga2_ca_key_path.stat.exists == false
       run_once: true
   when: icinga2_ca_host is defined and icinga2_ca_host == 'none'
@@ -93,33 +93,33 @@
     - name: Fetch ca.key from the first headend in icinga_headends
       fetch:
         src: "{{ icinga2_ca_path }}/ca.key"
-        dest: "/tmp/icinga_ca.key"
+        dest: "/tmp/icinga2_ca.key"
         flat: yes
-      delegate_to: "{{ groups['icinga_headends'][0] }}"
+      delegate_to: "{{ groups['dynamic_icinga_headend_group'][0] }}"
       run_once: true
 
     - name: Fetch ca.crt from the first headend in icinga_headends
       fetch:
         src: "{{ icinga2_ca_path }}/ca.crt"
-        dest: "/tmp/icinga_ca.crt"
+        dest: "/tmp/icinga2_ca.crt"
         flat: yes
-      delegate_to: "{{ groups['icinga_headends'][0] }}"
+      delegate_to: "{{ groups['dynamic_icinga_headend_group'][0] }}"
       run_once: true
 
     - name: Distribute ca.key to all other hosts in icinga_headends
       copy:
         src: "/tmp/icinga2_ca.key"
         dest: "{{ icinga2_ca_path }}/ca.key"
-      delegate_to: "{{ groups['icinga_headends'][1] }}"
+      when: inventory_hostname == groups['dynamic_icinga_headend_group'][1]
       run_once: true
 
     - name: Distribute ca.crt to all other hosts in icinga_headends
       copy:
         src: "/tmp/icinga2_ca.key"
         dest: "{{ icinga2_ca_path }}/ca.crt"
-      delegate_to: "{{ groups['icinga_headends'][1] }}"
+      when: inventory_hostname == groups['dynamic_icinga_headend_group'][1]
       run_once: true
-  when: icinga_ha | bool
+  when: icinga2_ha | bool
 
 - name: check cert key already exists
   stat:
