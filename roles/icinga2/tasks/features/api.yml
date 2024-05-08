@@ -68,6 +68,17 @@
   loop_control:
     loop_var: idx
 
+- set_fact:
+    dynamic_icinga_headend_group: "{{ combined_hostnames | default([]) + [hostvars[item].inventory_hostname] | flatten}}"
+  with_items: "{{ ansible_play_hosts_all }}"
+  run_once: true
+
+- name: Add dynamically collected hosts to a new group
+  add_host:
+    name: "{{ item }}"
+    groups: dynamic_icinga_headend_group
+  loop: "{{ combined_hostnames }}"
+
 - name: create new CA
   block:
     - name: check ca key already exists
@@ -119,7 +130,9 @@
         dest: "{{ icinga2_ca_path }}/ca.crt"
       when: inventory_hostname == groups['dynamic_icinga_headend_group'][1]
       run_once: true
-  when: icinga2_ha | bool
+  when: 
+    - icinga2_ha is defined
+    - icinga2_ha | bool
 
 - name: check cert key already exists
   stat:
