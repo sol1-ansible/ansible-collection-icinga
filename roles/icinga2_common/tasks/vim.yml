@@ -1,0 +1,9 @@
+---
+- name: Apt - install common packages
+  ansible.builtin.apt:
+    pkg: "{{ icinga2_common_packages }}"
+    state: present
+
+- name: Install icinga2 vim addon
+  command: vim-addon-manager install icinga2
+  when: ansible_os_family == "Debian"

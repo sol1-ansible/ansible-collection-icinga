@@ -1,0 +1,6 @@
+---
+icinga2_common_packages:
+  - git
+  - nmap
+  - tree
+icinga2_common_install_vim: true

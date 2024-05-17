@@ -1,0 +1,2 @@
+---
+icinga2_common_vim_packages: ["vim", "vim-icinga2", "vim-addon-manager"]
