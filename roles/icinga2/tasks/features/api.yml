@@ -107,7 +107,6 @@
         dest: "/tmp/icinga2_ca.key"
         flat: yes
       delegate_to: "{{ groups['dynamic_icinga_headend_group'][0] }}"
-      run_once: true
 
     - name: Fetch ca.crt from the first headend in icinga_headends
       fetch:
@@ -115,7 +114,6 @@
         dest: "/tmp/icinga2_ca.crt"
         flat: yes
       delegate_to: "{{ groups['dynamic_icinga_headend_group'][0] }}"
-      run_once: true
 
     - name: Distribute ca.key to all other hosts in icinga_headends
       copy:
@@ -124,7 +122,7 @@
 
     - name: Distribute ca.crt to all other hosts in icinga_headends
       copy:
-        src: "/tmp/icinga2_ca.key"
+        src: "/tmp/icinga2_ca.crt"
         dest: "{{ icinga2_ca_path }}/ca.crt"
   when: 
     - icinga2_ha is defined
