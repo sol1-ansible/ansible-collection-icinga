@@ -171,7 +171,9 @@
 
 - name: Write icingaweb2 authentication settings to INI file
   copy:
-    path: /etc/icingaweb2/authentication2.ini
+    dest: /etc/icingaweb2/authentication2.ini
     content: "{{ icingaweb2_authentication | community.general.to_ini }}"
-
+    owner: www-data
+    group: icingaweb2
+    mode: '0770'
 # {{ icingaweb2_db | ansible.builtin.combine(icingaweb2_db, append_rp)}}
