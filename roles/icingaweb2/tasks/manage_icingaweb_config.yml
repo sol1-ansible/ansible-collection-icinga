@@ -161,9 +161,9 @@
     section: icingaweb2
     section_has_values:
       - option: backend
-        values: "{{ icingaweb2_resource_type }}"
+        value: "{{ icingaweb2_resource_type }}"
       - option: resource
-        values: "{{ hv_icinga_db_credentials['icingaweb_db_name'] }}_db"
+        value: "{{ hv_icinga_db_credentials['icingaweb_db_name'] }}_db"
     owner: www-data
     group: icingaweb2
     mode: '0770'
