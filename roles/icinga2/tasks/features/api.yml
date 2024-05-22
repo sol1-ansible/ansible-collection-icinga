@@ -69,7 +69,7 @@
     loop_var: idx
 
 - set_fact:
-    dynamic_icinga_headend_group: "{{ combined_hostnames | default([]) + [hostvars[item].inventory_hostname] | flatten}}"
+    combined_hostnames: "{{ combined_hostnames | default([]) + [hostvars[item].inventory_hostname] | flatten}}"
   with_items: "{{ ansible_play_hosts_all }}"
   run_once: true
 
