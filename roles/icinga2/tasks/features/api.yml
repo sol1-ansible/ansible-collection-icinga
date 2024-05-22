@@ -121,14 +121,14 @@
       copy:
         src: "/tmp/icinga2_ca.key"
         dest: "{{ icinga2_ca_path }}/ca.key"
-      when: inventory_hostname == groups['dynamic_icinga_headend_group'][1]
+      delegate_to: "{{ groups['dynamic_icinga_headend_group'][1] }}"
       run_once: true
 
     - name: Distribute ca.crt to all other hosts in icinga_headends
       copy:
         src: "/tmp/icinga2_ca.key"
         dest: "{{ icinga2_ca_path }}/ca.crt"
-      when: inventory_hostname == groups['dynamic_icinga_headend_group'][1]
+      delegate_to: "{{ groups['dynamic_icinga_headend_group'][1] }}"
       run_once: true
   when: 
     - icinga2_ha is defined
