@@ -115,13 +115,13 @@
         flat: yes
       delegate_to: "{{ groups['dynamic_icinga_headend_group'][0] }}"
 
-   - name: Ensure /var/lib/icinga2/ca/ directory exists
-     file:
-       path: /var/lib/icinga2/ca/
-       state: directory
-       owner: nagios
-       group: nagios
-       mode: '0755'
+    - name: Ensure /var/lib/icinga2/ca/ directory exists
+      file:
+        path: /var/lib/icinga2/ca/
+        state: directory
+        owner: nagios
+        group: nagios
+        mode: '0755'
 
     - name: Distribute ca.key to all other hosts in icinga_headends
       copy:
