@@ -127,11 +127,17 @@
       copy:
         src: "/tmp/icinga2_ca.key"
         dest: "{{ icinga2_ca_path }}/ca.key"
+        owner: nagios
+        group: nagios
+        mode: '0600'
 
     - name: Distribute ca.crt to all other hosts in icinga_headends
       copy:
         src: "/tmp/icinga2_ca.crt"
         dest: "{{ icinga2_ca_path }}/ca.crt"
+        owner: nagios
+        group: nagios
+        mode: '0600'
   when: 
     - icinga2_ha is defined
     - icinga2_ha | bool
