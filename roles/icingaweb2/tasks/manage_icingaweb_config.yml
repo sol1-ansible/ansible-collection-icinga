@@ -173,9 +173,5 @@
   copy:
     path: /etc/icingaweb2/authentication2.ini
     content: "{{ icingaweb2_authentication | community.general.to_ini }}"
-  owner: www-data
-  group: icingaweb2
-  mode: '0770'
-  state: present
 
 # {{ icingaweb2_db | ansible.builtin.combine(icingaweb2_db, append_rp)}}
