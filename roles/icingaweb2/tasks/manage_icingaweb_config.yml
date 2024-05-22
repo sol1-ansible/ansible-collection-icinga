@@ -155,13 +155,27 @@
     - resources
     - roles
 
+- name: Ensure multiple values "beverage=coke" and "beverage=pepsi" are in section "[drinks]" in specified file
+  community.general.ini_file:
+    path: /etc/icingaweb2/authentication.ini
+    section: icingaweb2
+    section_has_values:
+      - option: backend
+        values: "{{ icingaweb2_resource_type }}"
+      - option: resource
+        values: "{{ hv_icinga_db_credentials['icingaweb_db_name'] }}_db"
+    owner: www-data
+    group: icingaweb2
+    mode: '0770'
+    state: present
+
 - name: Write icingaweb2 authentication settings to INI file
-  ini_file:
-    path: /path/to/your/ini/file.ini
-    section: "{{ item.0.key }}"
-    option: "{{ item.1.key }}"
-    value: "{{ item.1.value }}"
-  loop: "{{ icingaweb2_authentication | dict2items | subelements('value') }}"
-  loop_control:
-    label: "{{ item.0.key }}.{{ item.1.key }}"
+  copy:
+    path: /etc/icingaweb2/authentication2.ini
+    content: "{{ icingaweb2_authentication | community.general.to_ini }}"
+  owner: www-data
+  group: icingaweb2
+  mode: '0770'
+  state: present
+
 # {{ icingaweb2_db | ansible.builtin.combine(icingaweb2_db, append_rp)}}
