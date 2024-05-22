@@ -159,6 +159,9 @@
   community.general.ini_file:
     path: /etc/icingaweb2/authentication.ini
     section: icingaweb2
+    values:
+      - backend
+      - resource
     section_has_values:
       - option: backend
         value: "{{ icingaweb2_resource_type }}"
