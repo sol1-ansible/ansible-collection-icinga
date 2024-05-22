@@ -96,8 +96,8 @@
         icinga2 pki new-ca
       delegate_to: "{{ groups['dynamic_icinga_headend_group'][0] }}"
       when: icinga2_ca_cert_path.stat.exists == false and icinga2_ca_key_path.stat.exists == false
-      run_once: true
   when: icinga2_ca_host is defined and icinga2_ca_host == 'none'
+  run_once: true
 
 - name: Create HA Headends
   block:
