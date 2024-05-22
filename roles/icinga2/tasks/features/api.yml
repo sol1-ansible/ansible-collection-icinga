@@ -68,17 +68,22 @@
   loop_control:
     loop_var: idx
 
-- set_fact:
-    combined_hostnames: "{{ combined_hostnames | default([]) + [hostvars[item].inventory_hostname] | flatten}}"
-  with_items: "{{ ansible_play_hosts_all }}"
+- name: Set headend1 as cert server
   run_once: true
+  group_by:
+    key: "cert_server"
 
-- name: Add dynamically collected hosts to a new group
-  add_host:
-    name: "{{ item }}"
-    groups: dynamic_icinga_headend_group
-  loop: "{{ combined_hostnames }}"
-
+#- set_fact:
+#    combined_hostnames: "{{ combined_hostnames | default([]) + [hostvars[item].inventory_hostname] | flatten}}"
+#  with_items: "{{ ansible_play_hosts_all }}"
+#  run_once: true
+#
+#- name: Add dynamically collected hosts to a new group
+#  add_host:
+#    name: "{{ item }}"
+#    groups: dynamic_icinga_headend_group
+#  loop: "{{ combined_hostnames }}"
+#
 - name: create new CA
   block:
     - name: check ca key already exists
@@ -94,27 +99,27 @@
     - name: create CA
       shell: >
         icinga2 pki new-ca
-      delegate_to: "{{ groups['dynamic_icinga_headend_group'][0] }}"
       when: icinga2_ca_cert_path.stat.exists == false and icinga2_ca_key_path.stat.exists == false
-  when: icinga2_ca_host is defined and icinga2_ca_host == 'none'
-  run_once: true
 
-- name: Create HA Headends
-  block:
     - name: Fetch ca.key from the first headend in icinga_headends
       fetch:
         src: "{{ icinga2_ca_path }}/ca.key"
         dest: "/tmp/icinga2_ca.key"
         flat: yes
-      delegate_to: "{{ groups['dynamic_icinga_headend_group'][0] }}"
 
     - name: Fetch ca.crt from the first headend in icinga_headends
       fetch:
         src: "{{ icinga2_ca_path }}/ca.crt"
         dest: "/tmp/icinga2_ca.crt"
         flat: yes
-      delegate_to: "{{ groups['dynamic_icinga_headend_group'][0] }}"
 
+  when: 
+    - icinga2_ca_host is defined 
+    - icinga2_ca_host == 'none'
+    - "'cert_server' in group_names"
+
+- name: Create HA Headends
+  block:
     - name: Ensure /var/lib/icinga2/ca/ directory exists
       file:
         path: /var/lib/icinga2/ca/
@@ -141,6 +146,7 @@
   when: 
     - icinga2_ha is defined
     - icinga2_ha | bool
+    - "'cert_server' not in group_names"
 
 - name: check cert key already exists
   stat:
