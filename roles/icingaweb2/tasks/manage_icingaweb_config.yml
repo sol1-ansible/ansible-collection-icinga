@@ -33,6 +33,16 @@
     - authentication
     - roles
 
+- name: debug
+  debug:
+    var: "{{ item }}"
+  loop:
+    - config
+    - authentication
+    - groups
+  vars:
+    _i2_config_hash: "{{ vars['icingaweb2_' + item] }}"
+
 - name: Create icingaweb2 config files
   ansible.builtin.template:
     src: "modules_config.ini.j2"
