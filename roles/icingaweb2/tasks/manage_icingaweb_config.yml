@@ -144,4 +144,3 @@
   loop:
     - { name: authentication, content: "{{ icingaweb2_authentication }}" }
     - { name: groups, content: "{{ icingaweb2_groups }}" } 
-    - { name: resources, content: "{{ icingaweb2_resources | combine(icingaweb2_db) }}" }
