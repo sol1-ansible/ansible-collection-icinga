@@ -33,16 +33,6 @@
     - authentication
     - roles
 
-- name: debug
-  debug:
-    var: "{{ item }}"
-  loop:
-    - config
-    - authentication
-    - groups
-  vars:
-    _i2_config_hash: "{{ vars['icingaweb2_' + item] }}"
-
 - name: Create icingaweb2 config files
   ansible.builtin.template:
     src: "modules_config.ini.j2"
@@ -75,16 +65,6 @@
         ssl_cipher: "{{ icingaweb2_db['ssl_cipher'] | default(omit) }}"
         ssl_capath: "{{ icingaweb2_db['ssl_capath'] | default(omit) }}"
   when: icingaweb2_db is defined
-
-- name: debug
-  debug:
-    var: "{{ item }}"
-  loop:
-    - config
-    - authentication
-    - groups
-  vars:
-    _i2_config_hash: "{{ vars['icingaweb2_' + item] }}"
 
 - name: Assemble resources.ini
   when: icingaweb2_db is defined or icingaweb2_resources is defined
@@ -143,7 +123,6 @@
         group: "{{ icingaweb2_group }}"
       when: icingaweb2_roles is defined
 
-
 - name: Assemble configuration files
   ansible.builtin.assemble:
     dest: "{{ icingaweb2_config_dir }}/{{ item }}.ini"
@@ -155,28 +134,13 @@
     - resources
     - roles
 
-- name: Ensure multiple values "beverage=coke" and "beverage=pepsi" are in section "[drinks]" in specified file
-  community.general.ini_file:
-    path: /etc/icingaweb2/authentication.ini
-    section: icingaweb2
-    values:
-      - backend
-      - resource
-    section_has_values:
-      - option: backend
-        value: "{{ icingaweb2_resource_type }}"
-      - option: resource
-        value: "{{ hv_icinga_db_credentials['icingaweb_db_name'] }}_db"
-    owner: www-data
-    group: icingaweb2
-    mode: '0770'
-    state: present
-
-- name: Write icingaweb2 authentication settings to INI file
+- name: Write icingaweb2 settings to INI files
   copy:
-    dest: /etc/icingaweb2/authentication2.ini
-    content: "{{ icingaweb2_authentication | community.general.to_ini }}"
+    dest: "/etc/icingaweb2/{{ item.name }}.ini"
+    content: "{{ item.content | community.general.to_ini }}"
     owner: www-data
     group: icingaweb2
     mode: '0770'
-# {{ icingaweb2_db | ansible.builtin.combine(icingaweb2_db, append_rp)}}
+  loop:
+    - { name: authentication, content: "{{ icingaweb2_authentication }}" } 
+    - { name: groups, content: "{{ icingaweb2_groups }}" } 
