@@ -142,6 +142,6 @@
     group: icingaweb2
     mode: '0770'
   loop:
-    - { name: authentication, content: "{{ icingaweb2_authentication }}" } 
+    - { name: authentication, content: "{{ icingaweb2_authentication }}" }
     - { name: groups, content: "{{ icingaweb2_groups }}" } 
-    - { name: resources, content: "{{ icingaweb2_resources + icingaweb2_db }}" }
+    - { name: resources, content: "{{ icingaweb2_resources | combine(icingaweb2_db) }}" }
