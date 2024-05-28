@@ -36,7 +36,7 @@
           ssl_key: "{{ icingaweb2_resources['director_db']['ssl_key'] | default(omit) }}"
           ssl_cipher: "{{ icingaweb2_resources['director_db']['ssl_cipher'] | default(omit) }}"
           ssl_extra_options: "{{ icingaweb2_resources['director_db']['ssl_extra_options'] | default(omit) }}"
-          schema_path: /usr/share/icingaweb2/modules/director/schema/mysql.schema.sql
+          schema_path: /usr/share/icingaweb2/modules/director/schema/mysql.sql
           select_query: "select * from director"
           type: "{{ icingaweb2_resources['director_db']['db'] | default(omit) }}"
 
