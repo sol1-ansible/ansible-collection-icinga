@@ -39,11 +39,11 @@
           schema_path_mysql: /usr/share/icingaweb2/modules/director/schema/mysql.schema.sql
           schema_path_pgsql: /usr/share/icingaweb2/modules/director/schema/pgsql.schema.sql
           select_query: "select * from director"
-          type: "{{ icingaweb2_resources['director_db']['type'] | default(omit) }}"
+          type: "{{ icingaweb2_resources['director_db']['db'] | default(omit) }}"
 
     - ansible.builtin.fail:
         fail_msg: No database type was provided
-      when: icingaweb2_resources['director_db']['type'] is not defined
+      when: icingaweb2_resources['director_db']['db'] is not defined
 
     - ansible.builtin.fail:
         fail_msg: "Invalid database type was provided. [Supported: mysql, pgsql]"
