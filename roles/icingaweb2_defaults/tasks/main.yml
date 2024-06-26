@@ -1,0 +1,227 @@
+---
+- name: default icingaweb2_modules
+  var_icingaweb2_modules:
+    common_vars: "{{ icinga_shared_vars }}"
+  register: _icingaweb2_modules
+  
+- name: merge default icingaweb2_modules with any userset icingaweb2_modules
+  set_fact:
+    icingaweb2_modules: "{{ _icingaweb2_modules | combine(icingaweb2_modules | default({}, true), recursive=True) }}"
+
+- name: default icingaweb2_authentication if not userset
+  set_fact:
+    icingaweb2_authentication:
+      icingaweb2:
+        backend: "db"
+        resource: "{{ icinga_shared_vars.databases.icingaweb.resource_name }}"
+  when:
+    - icingaweb2_authentication is not defined
+    - icinga_shared_vars is defined
+    - icinga_shared_vars.databases is defined
+    - icinga_shared_vars.databases.icingaweb is defined
+    - icinga_shared_vars.databases.icingaweb.resource_name is defined
+
+- name: default icingaweb2_groups if not userset
+  set_fact:
+    icingaweb2_groups:
+      icingaweb2:
+        backend: "db"
+        resource: "{{ icinga_shared_vars.databases.icingaweb.resource_name }}"
+  when:
+    - icingaweb2_authentication is not defined
+    - icinga_shared_vars is defined
+    - icinga_shared_vars.databases is defined
+    - icinga_shared_vars.databases.icingaweb is defined
+    - icinga_shared_vars.databases.icingaweb.resource_name is defined
+
+- name: Set Default icingaweb2_resource_type
+  set_fact:
+    icingaweb2_resource_type: db 
+  when: 
+    - icingaweb2_resource_type is not defined
+
+- name: Set Default icingaweb2_resource_db_type
+  set_fact:
+    icingaweb2_resource_db_type: "{{ icinga_shared_vars.databases.icingaweb.type | default('mysql') }}"
+  when: 
+    - icingaweb2_resource_db_type is not defined
+
+- name: Set Default icingaweb2_resource_use_ssl
+  set_fact:
+    icingaweb2_resource_use_ssl: "{{ icinga_shared_vars.databases.icingaweb.use_ssl | default(0) }}"
+  when: 
+    - icingaweb2_resource_use_ssl is not defined
+
+- name: Set Default icingaweb2_resource_charset
+  set_fact:
+    icingaweb2_resource_charset: "{{ icinga_shared_vars.databases.icingaweb.charset | default('utf8') }}"
+  when: 
+    - icingaweb2_resource_charset is not defined
+
+- name: Set Default icingaweb2_db_import_schema
+  set_fact:
+    icingaweb2_db_import_schema: "{{ icinga_shared_vars.databases.icingaweb.charset | default(true) }}"
+  when: 
+    - icingaweb2_db_import_schema is not defined
+
+- block:
+  - name: Create icingaweb2_db if icingaweb is defined
+    set_fact:
+      icingaweb2_db: "{{ {'type': icingaweb2_resource_db_type} }}"
+
+  - name: Add 'host' to icingaweb2_db if 'host' is defined
+    set_fact:
+      icingaweb2_db: "{{ icingaweb2_db | combine({ 'host': icinga_shared_vars.databases.icingaweb.host }) }}"
+    when:
+      - icinga_shared_vars.databases.icingaweb.host is defined
+
+  - name: Add 'dbname' to icingaweb2_db if 'name' is defined
+    set_fact:
+      icingaweb2_db: "{{ icingaweb2_db | combine({ 'name': icinga_shared_vars.databases.icingaweb.dbname }) }}"
+    when:
+      - icinga_shared_vars.databases.icingaweb.dbname is defined
+
+  - name: Add 'username' to icingaweb2_db if 'user' is defined
+    set_fact:
+      icingaweb2_db: "{{ icingaweb2_db | combine({ 'user': icinga_shared_vars.databases.icingaweb.username | default(icinga_shared_vars.databases.icingaweb.dbname)}) }}"
+    when:
+      - icinga_shared_vars.databases.icingaweb.username is defined or icinga_shared_vars.databases.icingaweb.dbname is defined
+
+  - name: Add 'password' to icingaweb2_db if 'password' is defined
+    set_fact:
+      icingaweb2_db: "{{ icingaweb2_db | combine({ 'password': icinga_shared_vars.databases.icingaweb.password }) }}"
+    when:
+      - icinga_shared_vars.databases.icingaweb.password is defined
+
+  when: 
+    - icingaweb2_db is not defined
+    - icinga_shared_vars is defined
+    - icinga_shared_vars.databases is defined 
+    - icinga_shared_vars.databases.icingaweb is defined
+
+
+- block:
+  - name: Initialize icingaweb2_resources as an empty dictionary
+    set_fact:
+      icingaweb2_resources: {}
+
+  - block:
+    - name: Create icingaweb2_resources_director if director is defined
+      set_fact:
+        icingaweb2_resources_director: {'type': 'db'}
+
+    - name: Add 'db' to icingaweb2_resources_director if 'db' is defined
+      set_fact:
+        icingaweb2_resources_director: "{{ icingaweb2_resources_director | combine({'db': icinga_shared_vars.databases.director.type | default(icingaweb2_resource_db_type) }) }}"
+      when:
+        - icinga_shared_vars.databases.director.type is defined or icingaweb2_resource_db_type is defined
+
+    - name: Add 'host' to icingaweb2_resources_director if 'host' is defined
+      set_fact:
+        icingaweb2_resources_director: "{{ icingaweb2_resources_director | combine({'host': icinga_shared_vars.databases.director.host | default(icingaweb2_db['host'])}) }}"
+      when:
+        - icinga_shared_vars.databases.director.host is defined or icingaweb2_db['host'] is defined
+
+    - name: Add 'dbname' to icingaweb2_resources_director if 'dbname' is defined
+      set_fact:
+        icingaweb2_resources_director: "{{ icingaweb2_resources_director | combine({'dbname': icinga_shared_vars.databases.director.dbname }) }}"
+      when:
+        - icinga_shared_vars.databases.director.dbname is defined
+
+    - name: Add 'username' to icingaweb2_resources_director if 'username' is defined
+      set_fact:
+        icingaweb2_resources_director: "{{ icingaweb2_resources_director | combine({'username': icinga_shared_vars.databases.director.username | default(icinga_shared_vars.databases.icingaweb.dbname)}) }}"
+      when:
+        - icinga_shared_vars.databases.director.username is defined or icinga_shared_vars.databases.director.dbname is defined
+
+    - name: Add 'password' to icingaweb2_resources_director if 'password' is defined
+      set_fact:
+        icingaweb2_resources_director: "{{ icingaweb2_resources_director | combine({'password': icinga_shared_vars.databases.director.password }) }}"
+      when:
+        - icinga_shared_vars.databases.director.password is defined
+
+    - name: Add 'use_ssl' to icingaweb2_resources_director if 'use_ssl' is defined
+      set_fact:
+        icingaweb2_resources_director: "{{ icingaweb2_resources_director | combine({'use_ssl': icinga_shared_vars.databases.director.use_ssl | default(icingaweb2_resource_use_ssl)}) }}"
+
+    - name: Add 'charset' to icingaweb2_resources_director if 'charset' is defined
+      set_fact:
+        icingaweb2_resources_director: "{{ icingaweb2_resources_director | combine({'charset': charset | default(icingaweb2_resource_charset)}) }}"
+
+    - name: 
+      set_fact:
+        icingaweb2_resources: "{{ icingaweb2_resources | combine({icinga_shared_vars.databases.director.resource_name | default(icinga_shared_vars.databases.director.dbname + '_db'): icingaweb2_resources_director}) }}"
+
+    when: 
+      - icinga_shared_vars.databases.director is defined
+
+  - block:
+    - name: Create icingaweb2_resources_icingadb if icingadb is defined
+      set_fact:
+        icingaweb2_resources_icingadb: {'icingadb': {'type': 'db'}}
+
+    - name: Add 'db' to icingaweb2_resources_icingadb if 'db' is defined
+      set_fact:
+        icingaweb2_resources_icingadb: "{{ icingaweb2_resources_icingadb | combine({'db': icinga_shared_vars.databases.icingadb.type | default(icingaweb2_resource_db_type) }) }}"
+      when:
+        - icinga_shared_vars.databases.icingadb.type is defined or icingaweb2_resource_db_type is defined
+
+    - name: Add 'host' to icingaweb2_resources_icingadb if 'host' is defined
+      set_fact:
+        icingaweb2_resources_icingadb: "{{ icingaweb2_resources_icingadb | combine({'host': icinga_shared_vars.databases.icingadb.host | default(icingaweb2_db['host'])}) }}"
+      when:
+        - icinga_shared_vars.databases.icingadb.host is defined or icingaweb2_db['host'] is defined
+
+    - name: Add 'dbname' to icingaweb2_resources_icingadb if 'dbname' is defined
+      set_fact:
+        icingaweb2_resources_icingadb: "{{ icingaweb2_resources_icingadb | combine({'dbname': icinga_shared_vars.databases.icingadb.dbname }) }}"
+      when:
+        - icinga_shared_vars.databases.icingadb.dbname is defined
+
+    - name: Add 'username' to icingaweb2_resources_icingadb if 'username' is defined
+      set_fact:
+        icingaweb2_resources_icingadb: "{{ icingaweb2_resources_icingadb | combine({'username': icinga_shared_vars.databases.icingadb.username | default(icinga_shared_vars.databases.icingadb.dbname)}) }}"
+      when:
+        - icinga_shared_vars.databases.icingadb.username is defined or icinga_shared_vars.databases.icingadb.dbname is defined
+
+    - name: Add 'password' to icingaweb2_resources_icingadb if 'password' is defined
+      set_fact:
+        icingaweb2_resources_icingadb: "{{ icingaweb2_resources_icingadb | combine({'password': icinga_shared_vars.databases.icingadb.password }) }}"
+      when:
+        - icinga_shared_vars.databases.icingadb.password is defined
+
+    - name: Add 'use_ssl' to icingaweb2_resources_icingadb if 'use_ssl' is defined
+      set_fact:
+        icingaweb2_resources_icingadb: "{{ icingaweb2_resources_icingadb | combine({'use_ssl': icinga_shared_vars.databases.icingadb.use_ssl  | default(icingaweb2_resource_use_ssl)}) }}"
+
+    - name: Add 'charset' to icingaweb2_resources_icingadb if 'charset' is defined
+      set_fact:
+        icingaweb2_resources_icingadb: "{{ icingaweb2_resources_icingadb | combine({'charset': charset | default(icingaweb2_resource_charset)}) }}"
+
+    - name: 
+      set_fact:
+        icingaweb2_resources: "{{ icingaweb2_resources | combine({icinga_shared_vars.databases.icingadb.resource_name | default(icinga_shared_vars.databases.director.dbname + '_db'): icingaweb2_resources_icingadb}) }}"
+
+    when: 
+      - icinga_shared_vars.databases.icingadb is defined
+
+  when: 
+    - icingaweb2_resources is not defined
+    - icinga_shared_vars is defined
+    - icinga_shared_vars.databases is defined 
+    - icinga_shared_vars.databases.icingadb is defined or icinga_shared_vars.databases.director
+
+
+- name: Debug Icingaweb2 configuration variables
+  debug:
+    msg:
+      - "icingaweb2_modules: {{ icingaweb2_modules }}"
+      - "icingaweb2_authentication: {{ icingaweb2_authentication }}"
+      - "icingaweb2_groups: {{ icingaweb2_groups }}"
+      - "icingaweb2_resource_type: {{ icingaweb2_resource_type }}"
+      - "icingaweb2_resource_db_type: {{ icingaweb2_resource_db_type }}"
+      - "icingaweb2_resource_use_ssl: {{ icingaweb2_resource_use_ssl }}"
+      - "icingaweb2_resource_charset: {{ icingaweb2_resource_charset }}"
+      - "icingaweb2_db_import_schema: {{ icingaweb2_db_import_schema }}"
+      - "icingaweb2_db: {{ icingaweb2_db }}"
+      - "icingaweb2_resources: {{ icingaweb2_resources }}"
