@@ -193,7 +193,7 @@ def main():
 
     built = build_icinga2_features(parent_endpoints, my_endpoints, config_directories, features)
 
-    result['merged'] = built
+    result['built'] = built
     module.exit_json(**result)
 
 if __name__ == '__main__':
