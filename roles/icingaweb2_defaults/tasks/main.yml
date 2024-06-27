@@ -68,8 +68,8 @@
   - name: Create icingaweb2_db if icingaweb is defined
     set_fact:
       icingaweb2_db: "{{ {'type': icingaweb2_resource_db_type} }}"
-  when: 
-    - icingaweb2_db is not defined
+    when: 
+      - icingaweb2_db is not defined
 
   - name: Add 'host' to icingaweb2_db if 'host' is defined
     set_fact:
