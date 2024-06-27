@@ -68,6 +68,8 @@
   - name: Create icingaweb2_db if icingaweb is defined
     set_fact:
       icingaweb2_db: "{{ {'type': icingaweb2_resource_db_type} }}"
+  when: 
+    - icingaweb2_db is not defined
 
   - name: Add 'host' to icingaweb2_db if 'host' is defined
     set_fact:
@@ -94,7 +96,6 @@
       - icinga_shared_vars.databases.icingaweb.password is defined
 
   when: 
-    - icingaweb2_db is not defined
     - icinga_shared_vars is defined
     - icinga_shared_vars.databases is defined 
     - icinga_shared_vars.databases.icingaweb is defined
@@ -104,6 +105,8 @@
   - name: Initialize icingaweb2_resources as an empty dictionary
     set_fact:
       icingaweb2_resources: {}
+  when:
+    - icingaweb2_resources is not defined
 
   - block:
     - name: Create icingaweb2_resources_director if director is defined
@@ -206,7 +209,6 @@
       - icinga_shared_vars.databases.icingadb is defined
 
   when: 
-    - icingaweb2_resources is not defined
     - icinga_shared_vars is defined
     - icinga_shared_vars.databases is defined 
     - icinga_shared_vars.databases.icingadb is defined or icinga_shared_vars.databases.director
