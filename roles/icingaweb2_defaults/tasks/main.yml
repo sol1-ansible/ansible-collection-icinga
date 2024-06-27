@@ -6,7 +6,7 @@
   
 - name: merge default icingaweb2_modules with any userset icingaweb2_modules
   set_fact:
-    icingaweb2_modules: "{{ _icingaweb2_modules | combine(icingaweb2_modules | default({}, true), recursive=True) }}"
+    icingaweb2_modules: "{{ _icingaweb2_modules.built | combine(icingaweb2_modules | default({}, true), recursive=True) }}"
 
 - name: default icingaweb2_authentication if not userset
   set_fact:

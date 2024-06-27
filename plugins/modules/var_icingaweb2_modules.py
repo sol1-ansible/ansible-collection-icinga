@@ -182,14 +182,14 @@ def main():
 
     result = dict(
         changed=False,
-        merged={}
+        built={}
     )
 
     common_vars = module.params['common_vars']
 
-    merged = build_icingaweb2_modules(common_vars)
+    built = build_icingaweb2_modules(common_vars)
 
-    result['merged'] = merged
+    result['built'] = built
     module.exit_json(**result)
 
 if __name__ == '__main__':
