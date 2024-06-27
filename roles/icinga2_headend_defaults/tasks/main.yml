@@ -95,19 +95,19 @@
 - block:
   - name: Set default icingadb_database_type
     set_fact:
-      icingadb_database_type: "{{ icinga_shared_vars.headends.icingadb.type | default(mysql) }}"  # needed by the schema import
+      icingadb_database_type: "{{ icinga_shared_vars.headends.icingadb.type | default('mysql') }}"  # needed by the schema import
     when:
       - icingadb_database_type is not defined
 
   - name: Set default icingadb_database_host
     set_fact:
-      icingadb_database_host: "{{ icinga_shared_vars.headends.icingadb.host | default(localhost) }}"
+      icingadb_database_host: "{{ icinga_shared_vars.headends.icingadb.host | default('localhost') }}"
     when:
       - icingadb_database_host is not defined
 
   - name: Set default icingadb_database_port
     set_fact:
-      icingadb_database_port: "{{ icinga_shared_vars.headends.icingadb.port | default(3306) }}"
+      icingadb_database_port: "{{ icinga_shared_vars.headends.icingadb.port | default('3306') }}"
     when:
       - icingadb_database_port is not defined
 
@@ -120,7 +120,7 @@
 
   - name: Set default icingadb_database_user
     set_fact:
-      icingadb_database_user: "{{ icinga_shared_vars.databases.icingadb.dbname | default(icingadb) }}"
+      icingadb_database_user: "{{ icinga_shared_vars.databases.icingadb.dbname | default('icingadb') }}"
     when:
       - icingadb_database_user is not defined
 
