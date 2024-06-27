@@ -1,7 +1,7 @@
 ---
 - name: Set Default icinga2_confd
   set_fact:
-    icinga2_confd: local.d
+    icinga2_confd: 'local.d'
   when: 
     - icinga2_confd is not defined
 
