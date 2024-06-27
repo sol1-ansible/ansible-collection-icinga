@@ -161,7 +161,7 @@
   - block:
     - name: Create icingaweb2_resources_icingadb if icingadb is defined
       set_fact:
-        icingaweb2_resources_icingadb: {'icingadb': {'type': 'db'}}
+        icingaweb2_resources_icingadb: {'type': 'db'}
 
     - name: Add 'db' to icingaweb2_resources_icingadb if 'db' is defined
       set_fact:
