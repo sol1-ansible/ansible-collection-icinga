@@ -32,8 +32,7 @@
       command: "{{ icinga_shared_var_headend_features.command }}"
       notification: "{{ icinga_shared_var_headend_features.notification }}"
       mainlog: "{{ icinga_shared_var_headend_features.mainlog }}"
-      icingadb: "{{ icinga_shared_var_headend_features.icingadb }}"
-        host: "{{ icinga_shared_vars.databases.icingadb.host }}"
+      icingadb: 
         password: "{{ icinga_shared_vars.databases.icingadb.password }}"
         port: "{{ icinga_shared_vars.databases.icingadb.port | default(6380) }}"
   when: 
