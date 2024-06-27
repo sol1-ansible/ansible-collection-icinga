@@ -50,7 +50,7 @@
   
 - name: merge default _icinga2_features with any userset icinga2_features
   set_fact:
-    icinga2_features: "{{ _icinga2_features | combine(icinga2_features | default({}, true), recursive=True) }}"
+    icinga2_features: "{{ _icinga2_features.built | combine(icinga2_features | default({}, true), recursive=True) }}"
 
 - name: Find the matching headend
   set_fact:

@@ -183,7 +183,7 @@ def main():
 
     result = dict(
         changed=False,
-        merged={}
+        built={}
     )
 
     parent_endpoints = module.params['parent_endpoints']
@@ -191,9 +191,9 @@ def main():
     config_directories = module.params['config_directories']
     features = module.params['features']
 
-    merged = build_icinga2_features(parent_endpoints, my_endpoints, config_directories, features)
+    built = build_icinga2_features(parent_endpoints, my_endpoints, config_directories, features)
 
-    result['merged'] = merged
+    result['merged'] = built
     module.exit_json(**result)
 
 if __name__ == '__main__':
