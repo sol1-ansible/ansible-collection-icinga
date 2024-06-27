@@ -7,10 +7,10 @@
 
 - name: Set Default icinga2_config_directories
   set_fact:
-    icinga2_config_directories: 
+    icinga2_config_directories:
       - "{{ icinga2_confd }}/"
       - "zones.d/global/"
-   when: 
+  when: 
     - icinga2_config_directories is not defined
 
 - name: Set Default icinga_shared_var_headend_features
@@ -21,7 +21,7 @@
       command: 
       notification: 
       mainlog: 
-   when: 
+  when: 
     - icinga_shared_var_headend_features is not defined
 
 - name: Set Default icinga_shared_var_headend_features
@@ -36,7 +36,7 @@
         host: "{{ icinga_shared_vars.databases.icingadb.host }}"
         password: "{{ icinga_shared_vars.databases.icingadb.password }}"
         port: "{{ icinga_shared_vars.databases.icingadb.port | default(6380) }}"
-   when: 
+  when: 
     - icinga_shared_var_headend_features is not defined
     - icinga_shared_vars is defined
     - icinga_shared_vars.databases is defined
@@ -148,7 +148,6 @@
       icingadb_redis_password: "{{ icinga_shared_vars.headends[matched_headend].redis_password | default("MISSING") }}"
     when:
       - icingadb_redis_password is not defined
-
 
   when:
     - icinga_shared_vars is defined
