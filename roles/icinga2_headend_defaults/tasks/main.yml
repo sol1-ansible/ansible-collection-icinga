@@ -144,7 +144,7 @@
 
   - name: Set default icingadb_redis_password
     set_fact:
-      icingadb_redis_password: "{{ icinga_shared_vars.headends[matched_headend].redis_password | default("MISSING") }}"
+      icingadb_redis_password: "{{ icinga_shared_vars.headends[matched_headend].redis_password | default('MISSING') }}"
     when:
       - icingadb_redis_password is not defined
 
