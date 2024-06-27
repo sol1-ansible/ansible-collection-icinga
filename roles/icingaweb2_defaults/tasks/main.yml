@@ -28,7 +28,7 @@
         backend: "db"
         resource: "{{ icinga_shared_vars.databases.icingaweb.resource_name }}"
   when:
-    - icingaweb2_authentication is not defined
+    - icingaweb2_groups is not defined
     - icinga_shared_vars is defined
     - icinga_shared_vars.databases is defined
     - icinga_shared_vars.databases.icingaweb is defined
