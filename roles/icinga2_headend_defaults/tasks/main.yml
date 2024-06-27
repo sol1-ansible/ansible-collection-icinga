@@ -55,7 +55,9 @@
 - name: Find the matching headend
   set_fact:
     matching_headend: "{{ item.key }}"
-  when: item.value.name == inventory_hostname
+  when: 
+    - item.value.name is defined
+    - item.value.name == inventory_hostname
   with_dict: "{{ icinga_shared_vars.headends }}"
   register: matched_headend
 
