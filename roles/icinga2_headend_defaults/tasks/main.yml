@@ -42,7 +42,7 @@
     - icinga_shared_vars.databases.icingadb is defined
 
 - name: default icinga2_features
-  build_icinga2_features:
+  icinga.icinga.build_icinga2_features:
     my_endpoints: "{{ icinga_shared_vars['headends'] }}"
     config_directories: "{{ icinga2_config_directories }}"
     features: "{{ icinga_shared_var_headend_features }}"
