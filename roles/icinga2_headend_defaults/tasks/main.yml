@@ -9,7 +9,7 @@
   set_fact:
     icinga2_config_directories: 
       - "{{ icinga2_confd }}/"
-      - zones.d/global/
+      - "zones.d/global/"
    when: 
     - icinga2_config_directories is not defined
 
