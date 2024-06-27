@@ -105,8 +105,8 @@
   - name: Initialize icingaweb2_resources as an empty dictionary
     set_fact:
       icingaweb2_resources: {}
-  when:
-    - icingaweb2_resources is not defined
+    when:
+      - icingaweb2_resources is not defined
 
   - block:
     - name: Create icingaweb2_resources_director if director is defined
