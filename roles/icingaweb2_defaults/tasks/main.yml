@@ -217,7 +217,7 @@
 - name: Debug Icingaweb2 configuration variables
   debug:
     msg:
-      - "icingaweb2_modules: {{ icingaweb2_modules }}"
+      - "icingaweb2_modules: {{ icingaweb2_modules | to_nice_json }}"
       - "icingaweb2_authentication: {{ icingaweb2_authentication }}"
       - "icingaweb2_groups: {{ icingaweb2_groups }}"
       - "icingaweb2_resource_type: {{ icingaweb2_resource_type }}"
