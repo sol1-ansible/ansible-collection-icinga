@@ -169,7 +169,7 @@
 - name: Debug Icinga2 configuration variables
   debug:
     msg:
-      - "icinga2_features: {{ icinga2_features | to_nice_json }}"
+      - "icinga2_features: {{ icinga2_features }}"
       - "icinga2_confd: {{ icinga2_confd }}"
       - "icinga2_config_directories: {{ icinga2_config_directories }}"
       - "icingadb_database_type: {{ icingadb_database_type }}"
