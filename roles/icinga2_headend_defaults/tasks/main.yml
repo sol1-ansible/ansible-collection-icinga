@@ -49,6 +49,7 @@
     my_endpoints: "{{ icinga_shared_vars['headends'] }}"
     config_directories: "{{ icinga2_config_global_directories }}"
     features: "{{ icinga_shared_var_headend_features }}"
+    common_name: "{{ inventory_hostname }}"
   register: _icinga2_features
   
 - name: merge default _icinga2_features with any userset icinga2_features

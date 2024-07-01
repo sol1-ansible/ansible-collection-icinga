@@ -122,7 +122,7 @@ def build_icinga2_zone(endpoint_zones = [], global_zones = []):
     zones.extend(build_icinga2_global_zone(global_zones))
     return zones
 
-def build_icinga2_api(endpoint_zones, global_zones):
+def build_icinga2_api(endpoint_zones, global_zones, common_name):
     api = {
         'name': 'api',
         'force_newcert': False,
@@ -130,6 +130,8 @@ def build_icinga2_api(endpoint_zones, global_zones):
         'endpoints': build_icinga2_endpoints(endpoint_zones),
         'zones': build_icinga2_zone(endpoint_zones, global_zones),
     }
+    if common_name:
+        api['cert_name'] = common_name
     return api
 
 def build_icinga2_notification(endpoints):
@@ -152,10 +154,10 @@ def build_icinga2_icingadb(icingadb):
     
 
 
-def build_icinga2_features(parent_endpoints, my_endpoints, config_directories, features):
+def build_icinga2_features(parent_endpoints, my_endpoints, config_directories, features, common_name):
     
     icinga2_features = [
-        build_icinga2_api([parent_endpoints, my_endpoints], config_directories),
+        build_icinga2_api([parent_endpoints, my_endpoints], config_directories, common_name),
         {'name': 'checker'},
     ]
     if 'command' in features:
@@ -174,7 +176,8 @@ def main():
         parent_endpoints=dict(type='dict', required=False, default={}),
         my_endpoints=dict(type='dict', required=True),
         config_directories=dict(type='list', required=True),
-        features=dict(type='dict', required=True)
+        features=dict(type='dict', required=True),
+        common_name=str(type='str', required=True)
     )
 
     module = AnsibleModule(
@@ -191,8 +194,9 @@ def main():
     my_endpoints = module.params['my_endpoints']
     config_directories = module.params['config_directories']
     features = module.params['features']
+    common_name = module.params['common_name']
 
-    built = build_icinga2_features(parent_endpoints, my_endpoints, config_directories, features)
+    built = build_icinga2_features(parent_endpoints, my_endpoints, config_directories, features, common_name)
 
     result['built'] = built
     module.exit_json(**result)
