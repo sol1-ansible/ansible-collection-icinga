@@ -170,10 +170,20 @@
     - icinga_shared_vars.databases is defined
     - icinga_shared_vars.databases.icingadb is defined
 
+- name: Set default icinga2_ha
+  set_fact:
+    icinga2_ha: true
+  when:
+    - icinga2_ha is not defined
+    - icinga_shared_vars is defined
+    - icinga_shared_vars.headends is defined
+    - icinga_shared_vars.headends.headend2 is defined
+
 - name: Debug Icinga2 configuration variables
   debug:
     msg:
       - "icinga2_features: {{ icinga2_features }}"
+      - "icinga2_ha: {{ icinga2_ha }}"
       - "icinga2_confd: {{ icinga2_confd }}"
       - "icinga2_config_directories: {{ icinga2_config_directories }}"
       - "icingadb_database_type: {{ icingadb_database_type }}"
