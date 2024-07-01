@@ -106,7 +106,7 @@
 
 - name: merge default _icinga2_objects with any userset icinga2_objects
   set_fact:
-    icinga2_objects: "{{ _icinga2_objects | combine(icinga2_objects | default({}, true), recursive=True) }}"
+    icinga2_objects: "{{ _icinga2_objects + (icinga2_objects | default([], true)) }}"
 
 - block:
   - name: Set default icingadb_database_type
