@@ -177,7 +177,7 @@ def main():
         my_endpoints=dict(type='dict', required=True),
         config_directories=dict(type='list', required=True),
         features=dict(type='dict', required=True),
-        common_name=str(type='str', required=True)
+        common_name=dict(type='str', required=True)
     )
 
     module = AnsibleModule(
