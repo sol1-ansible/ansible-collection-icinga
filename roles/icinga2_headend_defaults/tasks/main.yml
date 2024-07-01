@@ -88,7 +88,7 @@
     icinga2_constants: 
       NodeName: "{{ inventory_hostname }}"
       ZoneName: "{{ icinga_shared_vars.headends.zone }}"
-      TicketSalt: "{{ icinga_shared_vars.headends[matching_headend].salt | default(matching_headend + lookup('community.general.random_string', 60)) }}"
+      TicketSalt: "{{ icinga_shared_vars.headends[matching_headend].salt | default(matching_headend + lookup('community.general.random_string', 60, 'upperalpha,digits')) }}"
   when:
     - icinga_shared_vars is defined
     - icinga_shared_vars.headends is defined
