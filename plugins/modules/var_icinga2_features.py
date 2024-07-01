@@ -126,7 +126,7 @@ def build_icinga2_api(endpoint_zones, global_zones):
     api = {
         'name': 'api',
         'force_newcert': False,
-        'ca_host': None,
+        'ca_host': 'none',
         'endpoints': build_icinga2_endpoints(endpoint_zones),
         'zones': build_icinga2_zone(endpoint_zones, global_zones),
     }
