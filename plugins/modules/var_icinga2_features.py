@@ -107,7 +107,7 @@ def build_icinga2_endpoint_zone(endpoints, zone):
 def build_icinga2_global_zone(zones):
     _zone = []
     for zone in zones:
-        if _zone.split('/')[0] == "zones.d":
+        if zone.split('/')[0] == "zones.d":
             _zone.append({
                 'name': zone.split('/')[1],
                 'global': True
