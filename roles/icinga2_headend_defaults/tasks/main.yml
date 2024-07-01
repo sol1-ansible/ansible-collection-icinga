@@ -3,11 +3,16 @@
   set_fact:
     icinga2_confd: "local.d"
 
+- name: Set Default icinga2_config_global_directories
+  set_fact:
+    icinga2_config_global_directories:
+      - "zones.d/global/"
+  when: 
+    - icinga2_config_global_directories is not defined
+
 - name: Set Default icinga2_config_directories
   set_fact:
-    icinga2_config_directories:
-      - "{{ icinga2_confd }}/"
-      - "zones.d/global/"
+    icinga2_config_directories: "{{ [icinga2_confd + '/'] + icinga2_config_global_directories }}"
   when: 
     - icinga2_config_directories is not defined
 
@@ -42,7 +47,7 @@
 - name: default icinga2_features
   var_icinga2_features:
     my_endpoints: "{{ icinga_shared_vars['headends'] }}"
-    config_directories: "{{ icinga2_config_directories }}"
+    config_directories: "{{ icinga2_config_global_directories }}"
     features: "{{ icinga_shared_var_headend_features }}"
   register: _icinga2_features
   
