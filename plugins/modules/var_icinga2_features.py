@@ -83,7 +83,7 @@ def build_icinga2_endpoints(endpoint_zones):
                     'name': endpoint['name']
                 }
                 if 'address' in endpoint:
-                    _endpoint['host'] = endpoint
+                    _endpoint['host'] = endpoint['address']
                     if 'port' in _endpoint:
                         _endpoint['port'] = endpoint['port']
                     else:
