@@ -138,9 +138,8 @@
 
   - name: Set default icingadb_database_password
     set_fact:
-      icingadb_database_password: "{{ icinga_shared_vars.databases.icingadb.password }}"
+      icingadb_database_password: "{{ icinga_shared_vars.databases.icingadb.password | default(icingadb_database_password) }}"
     when:
-      - icingadb_database_password is not defined
       - icinga_shared_vars.databases.icingadb.password is defined
 
   - name: Set default icingadb_redis_binds
