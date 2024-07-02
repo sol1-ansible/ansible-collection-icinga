@@ -133,7 +133,7 @@
 
     - name: Add 'username' to icingaweb2_resources_director if 'username' is defined
       set_fact:
-        icingaweb2_resources_director: "{{ icingaweb2_resources_director | combine({'username': icinga_shared_vars.databases.director.username | default(icinga_shared_vars.databases.icingaweb.dbname)}) }}"
+        icingaweb2_resources_director: "{{ icingaweb2_resources_director | combine({'username': icinga_shared_vars.databases.director.username | default(icinga_shared_vars.databases.director.dbname)}) }}"
       when:
         - icinga_shared_vars.databases.director.username is defined or icinga_shared_vars.databases.director.dbname is defined
 
