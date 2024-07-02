@@ -151,14 +151,14 @@
   - name: Set default icingadb_redis_binds
     set_fact:
       icingadb_redis_binds: [ "0.0.0.0" ]
-    when:
-      - icingadb_redis_binds is not defined
+    # when:
+    #   - icingadb_redis_binds is not defined
 
   - name: Set default icingadb_redis_port
     set_fact:
       icingadb_redis_port: "6380"
-    when:
-      - icingadb_redis_port is not defined
+    # when:
+    #   - icingadb_redis_port is not defined
 
   - name: Set default icingadb_redis_password
     set_fact:
