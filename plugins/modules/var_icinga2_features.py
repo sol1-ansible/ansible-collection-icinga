@@ -122,16 +122,20 @@ def build_icinga2_zone(endpoint_zones = [], global_zones = []):
     zones.extend(build_icinga2_global_zone(global_zones))
     return zones
 
-def build_icinga2_api(endpoint_zones, global_zones, common_name):
+def build_icinga2_api(parent_endpoints, my_endpoints, global_zones, common_name):
     api = {
         'name': 'api',
         'force_newcert': False,
         'ca_host': 'none',
-        'endpoints': build_icinga2_endpoints(endpoint_zones),
-        'zones': build_icinga2_zone(endpoint_zones, global_zones),
+        'endpoints': build_icinga2_endpoints([parent_endpoints, my_endpoints]),
+        'zones': build_icinga2_zone([parent_endpoints, my_endpoints], global_zones),
     }
     if common_name:
         api['cert_name'] = common_name
+    if parent_endpoints:
+        api['accept_config'] = True
+        api['accept_commands'] = True
+
     return api
 
 def build_icinga2_notification(endpoints):
@@ -157,7 +161,7 @@ def build_icinga2_icingadb(icingadb):
 def build_icinga2_features(parent_endpoints, my_endpoints, config_directories, features, common_name):
     
     icinga2_features = [
-        build_icinga2_api([parent_endpoints, my_endpoints], config_directories, common_name),
+        build_icinga2_api(parent_endpoints, my_endpoints, config_directories, common_name),
         {'name': 'checker'},
     ]
     if 'command' in features:
