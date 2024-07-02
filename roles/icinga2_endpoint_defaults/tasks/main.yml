@@ -1,0 +1,73 @@
+---
+- name: Set Default icinga2_confd
+  set_fact:
+    icinga2_confd: "local.d"
+
+- name: Set Default icinga2_config_global_directories
+  set_fact:
+    icinga2_config_global_directories:
+      - "zones.d/global/"
+      - "zones.d/director-global/"
+  when: 
+    - icinga2_config_global_directories is not defined
+
+- name: Set Default icinga2_config_directories
+  set_fact:
+    icinga2_config_directories: "{{ [icinga2_confd + '/'] + icinga2_config_global_directories }}"
+
+- name: Set Default icinga_zone_var_endpoint_features
+  set_fact:
+    icinga_zone_var_endpoint_features: 
+      api: 
+      checker: 
+      mainlog: 
+  when: 
+    - icinga_zone_var_endpoint_features is not defined
+
+- name: default icinga2_features
+  var_icinga2_features:
+    parent_endpoints: "{{ icinga_zone_vars['parent_endpoints'] }}"
+    my_endpoints: "{{ icinga_zone_vars['endpoints'] }}"
+    config_directories: "{{ icinga2_config_global_directories }}"
+    features: "{{ icinga_zone_var_endpoint_features }}"
+    common_name: "{{ inventory_hostname }}"
+  register: _icinga2_features
+  
+- name: merge default _icinga2_features with any userset icinga2_features
+  set_fact:
+    icinga2_features: "{{ _icinga2_features.built }}"
+
+- name: Set default icinga2_constants
+  set_fact:
+    icinga2_constants: 
+      NodeName: "{{ inventory_hostname }}"
+      ZoneName: "{{ icinga_zone_vars.endpoints.zone }}"
+  when:
+    - icinga_zone_vars is defined
+    - icinga_zone_vars.endpoints is defined
+    - icinga_zone_vars.endpoints.zone is defined
+
+- name: Set default _icinga2_objects
+  set_fact:
+    icinga2_objects:
+      - name: "{{ icinga_zone_vars.endpoints[matching_headend].api_user }}"
+        type: ApiUser
+        file: "{{ icinga2_confd }}/api-users.conf"
+        password: "{{ icinga_zone_vars.endpoints[matching_headend].api_password }}"
+        permissions: 
+          - "*"
+  when:
+    - icinga_zone_vars is defined
+    - icinga_zone_vars.endpoints is defined
+    - icinga_zone_vars.endpoints.api_user is defined
+    - icinga_zone_vars.endpoints.api_password is defined
+
+- name: Debug Icinga2 configuration variables
+  debug:
+    msg:
+      - "icinga2_features: {{ icinga2_features }}"
+      - "icinga2_confd: {{ icinga2_confd }}"
+      - "icinga2_config_directories: {{ icinga2_config_directories }}"
+      - "icinga2_constants: {{ icinga2_constants }}"
+      - "icinga2_objects: {{ icinga2_objects | default('')}}"
+
