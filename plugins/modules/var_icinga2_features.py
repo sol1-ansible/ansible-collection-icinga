@@ -135,7 +135,7 @@ def build_icinga2_api(parent_endpoints, my_endpoints, global_zones, common_name)
     if parent_endpoints:
         api['accept_config'] = True
         api['accept_commands'] = True
-
+        api['ca_host'] = parent_endpoints[next(iter(parent_endpoints))].get('address', 'none')
     return api
 
 def build_icinga2_notification(endpoints):
