@@ -123,7 +123,7 @@ def build_icingadb_redis(headends):
             else:
                 redis[redis_key]['port'] = 6380
             if headend.get('redis_password', None) is not None:
-                redis[redis_key]['redis_password'] = headend['redis_password']
+                redis[redis_key]['password'] = headend['redis_password']
     return redis
 
 def build_icingadb_module(headends, databases):
