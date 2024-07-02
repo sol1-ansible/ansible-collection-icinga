@@ -26,7 +26,7 @@
 
 - name: default icinga2_features
   var_icinga2_features:
-    parent_endpoints: "{{ icinga_zone_vars['parent_endpoints'] }}"
+    parent_endpoints: "{{ icinga_zone_vars['parents'] }}"
     my_endpoints: "{{ icinga_zone_vars['endpoints'] }}"
     config_directories: "{{ icinga2_config_global_directories }}"
     features: "{{ icinga_zone_var_endpoint_features }}"
