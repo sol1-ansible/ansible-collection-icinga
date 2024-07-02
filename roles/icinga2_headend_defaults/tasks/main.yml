@@ -1,4 +1,12 @@
 ---
+- name: Find the matching headend
+  set_fact:
+    matching_headend: "{{ item.key }}"
+  when: 
+    - item.value.name is defined
+    - item.value.name == inventory_hostname
+  with_dict: "{{ icinga_shared_vars.headends }}"
+
 - name: Set Default icinga2_confd
   set_fact:
     icinga2_confd: "local.d"
@@ -36,8 +44,8 @@
       notification: "{{ icinga_shared_var_headend_features.notification }}"
       mainlog: "{{ icinga_shared_var_headend_features.mainlog }}"
       icingadb: 
-        password: "{{ icinga_shared_vars.databases.icingadb.password }}"
-        port: "{{ icinga_shared_vars.databases.icingadb.port | default(6380) }}"
+        password: "{{ icinga_shared_vars.headends[matching_headend].redis_password }}"
+        port: "{{ icinga_shared_vars.headends[matching_headend].redis_port | default(6380) }}"
   when: 
     - icinga_shared_var_headend_features is defined
     - icinga_shared_vars is defined
@@ -56,14 +64,6 @@
   set_fact:
     icinga2_features: "{{ _icinga2_features.built }}"
     # icinga2_features: "{{ _icinga2_features.built | combine(icinga2_features | default({}, true), recursive=True) }}"
-
-- name: Find the matching headend
-  set_fact:
-    matching_headend: "{{ item.key }}"
-  when: 
-    - item.value.name is defined
-    - item.value.name == inventory_hostname
-  with_dict: "{{ icinga_shared_vars.headends }}"
 
 - name: Set default icingadb_database_import_schema
   set_fact:
