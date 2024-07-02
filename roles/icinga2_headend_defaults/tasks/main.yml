@@ -67,15 +67,14 @@
 
 - name: Set default icingadb_database_import_schema
   set_fact:
-    _icingadb_database_import_schema: false  # needed by the schema import
+    icingadb_database_import_schema: false  # needed by the schema import
   when:
     - icingadb_database_import_schema is not defined
 
 - name: Set default icingadb_database_import_schema
   set_fact:
-    _icingadb_database_import_schema: true  # needed by the schema import
+    icingadb_database_import_schema: true  # needed by the schema import
   when:
-    - icingadb_database_import_schema is not defined
     - matching_headend == 'headend1'
 
 # - name: Set default icingadb_database_import_schema
