@@ -39,7 +39,7 @@
         password: "{{ icinga_shared_vars.databases.icingadb.password }}"
         port: "{{ icinga_shared_vars.databases.icingadb.port | default(6380) }}"
   when: 
-    - icinga_shared_var_headend_features is not defined
+    - icinga_shared_var_headend_features is defined
     - icinga_shared_vars is defined
     - icinga_shared_vars.databases is defined
     - icinga_shared_vars.databases.icingadb is defined
