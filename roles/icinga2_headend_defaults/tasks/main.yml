@@ -117,15 +117,11 @@
 
   - name: Set default icingadb_database_host
     set_fact:
-      icingadb_database_host: "{{ icinga_shared_vars.headends.icingadb.host | default('localhost') }}"
-    when:
-      - icingadb_database_host is not defined
+      icingadb_database_host: "{{ icinga_shared_vars.headends.icingadb.host | default(icingadb_database_host) | default('localhost') }}"
 
   - name: Set default icingadb_database_port
     set_fact:
-      icingadb_database_port: "{{ icinga_shared_vars.headends.icingadb.port | default('3306') }}"
-    when:
-      - icingadb_database_port is not defined
+      icingadb_database_port: "{{ icinga_shared_vars.headends.icingadb.port | default(icingadb_database_port) | default('3306') }}"
 
   - name: Set default icingadb_database_user
     set_fact:
