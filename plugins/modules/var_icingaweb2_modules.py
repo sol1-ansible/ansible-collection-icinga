@@ -112,7 +112,7 @@ def build_icingadb_config(headends, databases):
 def build_icingadb_redis(headends):
     redis = {}
     for key, headend in headends.items():
-        if isinstance(headend, dict) and str(headend['name']).startswith('headend'):
+        if isinstance(headend, dict) and str(key).startswith('headend'):
             # gets the headend number
             redis_key = f'redis{key[-1]}'
             redis[redis_key] = {
