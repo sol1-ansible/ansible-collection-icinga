@@ -118,12 +118,10 @@ def build_icinga2_global_zone(zones):
 
 def build_icinga2_zone(parent_endpoints = [], my_endpoints = [], global_zones = []):
     zones = []
-    for endpoint_zone in my_endpoints:
-        if 'zone' in endpoint_zone:
-            zones.append(build_icinga2_endpoint_zone(endpoint_zone, endpoint_zone['zone']), parent_endpoints.get('zone', ''))
-    for endpoint_zone in parent_endpoints:
-        if 'zone' in endpoint_zone:
-            zones.append(build_icinga2_endpoint_zone(endpoint_zone, endpoint_zone['zone']))
+    if 'zone' in my_endpoints:
+        zones.append(build_icinga2_endpoint_zone(my_endpoints, my_endpoints['zone'], parent_endpoints.get('zone', '')))
+    if 'zone' in parent_endpoints:
+        zones.append(build_icinga2_endpoint_zone(parent_endpoints, parent_endpoints['zone']))
     zones.extend(build_icinga2_global_zone(global_zones))
     return zones
 
