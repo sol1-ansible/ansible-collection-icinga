@@ -92,7 +92,7 @@ def build_icinga2_endpoints(endpoint_zones):
     return _endpoints
 
 # Function to build a single zone, call this multiple times to build all zones
-def build_icinga2_endpoint_zone(endpoints, zone):
+def build_icinga2_endpoint_zone(endpoints, zone, parent_zone = ""):
     _endpoints = []
     for key, endpoint in endpoints.items():
         if 'name' in endpoint:
@@ -101,6 +101,8 @@ def build_icinga2_endpoint_zone(endpoints, zone):
         'name': endpoints['zone'],
         'endpoints': _endpoints
     }
+    if parent_zone:
+        zone['parent'] = parent_zone
     return zone
 
 # Function to build multiple global zones
@@ -114,9 +116,12 @@ def build_icinga2_global_zone(zones):
             })
     return _zone
 
-def build_icinga2_zone(endpoint_zones = [], global_zones = []):
+def build_icinga2_zone(parent_endpoints = [], my_endpoints = [], global_zones = []):
     zones = []
-    for endpoint_zone in endpoint_zones:
+    for endpoint_zone in my_endpoints:
+        if 'zone' in endpoint_zone:
+            zones.append(build_icinga2_endpoint_zone(endpoint_zone, endpoint_zone['zone']), parent_endpoints.get('zone', ''))
+    for endpoint_zone in parent_endpoints:
         if 'zone' in endpoint_zone:
             zones.append(build_icinga2_endpoint_zone(endpoint_zone, endpoint_zone['zone']))
     zones.extend(build_icinga2_global_zone(global_zones))
@@ -128,7 +133,7 @@ def build_icinga2_api(parent_endpoints, my_endpoints, global_zones, common_name)
         'force_newcert': False,
         'ca_host': 'none',
         'endpoints': build_icinga2_endpoints([parent_endpoints, my_endpoints]),
-        'zones': build_icinga2_zone([parent_endpoints, my_endpoints], global_zones),
+        'zones': build_icinga2_zone(parent_endpoints, my_endpoints, global_zones),
         'accept_config': True,
         'accept_commands': True
     }
