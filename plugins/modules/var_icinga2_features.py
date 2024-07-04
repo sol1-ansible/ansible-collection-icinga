@@ -129,12 +129,12 @@ def build_icinga2_api(parent_endpoints, my_endpoints, global_zones, common_name)
         'ca_host': 'none',
         'endpoints': build_icinga2_endpoints([parent_endpoints, my_endpoints]),
         'zones': build_icinga2_zone([parent_endpoints, my_endpoints], global_zones),
+        'accept_config': True,
+        'accept_commands': True
     }
     if common_name:
         api['cert_name'] = common_name
     if parent_endpoints:
-        api['accept_config'] = True
-        api['accept_commands'] = True
         api['ca_host'] = parent_endpoints[next(iter(parent_endpoints))].get('address', 'none')
     return api
 
