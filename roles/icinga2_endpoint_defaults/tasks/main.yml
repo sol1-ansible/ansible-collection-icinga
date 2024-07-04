@@ -3,17 +3,9 @@
   set_fact:
     icinga2_confd: "local.d"
 
-- name: Set Default icinga2_config_global_directories
-  set_fact:
-    icinga2_config_global_directories:
-      - "zones.d/global/"
-      - "zones.d/director-global/"
-  when: 
-    - icinga2_config_global_directories is not defined
-
 - name: Set Default icinga2_config_directories
   set_fact:
-    icinga2_config_directories: "{{ [icinga2_confd + '/'] + icinga2_config_global_directories }}"
+    icinga2_config_directories: "{{ [icinga2_confd + '/'] }}"
 
 - name: Set Default icinga_zone_var_endpoint_features
   set_fact:
@@ -24,11 +16,19 @@
   when: 
     - icinga_zone_var_endpoint_features is not defined
 
+- name: Set Default icinga2_config_global_zones
+  set_fact:
+    icinga2_config_global_zones:
+      - "zones.d/global/"
+      - "zones.d/director-global/"
+  when: 
+    - icinga2_config_global_zones is not defined
+
 - name: default icinga2_features
   var_icinga2_features:
     parent_endpoints: "{{ icinga_zone_vars['parents'] }}"
     my_endpoints: "{{ icinga_zone_vars['endpoints'] }}"
-    config_directories: "{{ icinga2_config_global_directories }}"
+    config_directories: "{{ icinga2_config_global_zones }}"
     features: "{{ icinga_zone_var_endpoint_features }}"
     common_name: "{{ inventory_hostname }}"
   register: _icinga2_features
