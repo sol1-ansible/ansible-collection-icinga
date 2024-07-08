@@ -201,15 +201,11 @@
         icinga_master_ssh_user: "{{ ansible_ssh_user | default('root') }}"
       when: icinga_master_ssh_user is not defined
 
-    - name: Debug default user 
-      debug:
-        msg: "{{ icinga_master_ssh_user }}"
-
     - name: delegate ticket request to master
       shell: icinga2 pki ticket --cn "{{ icinga2_cert_name }}" {% if icinga2_ticket_salt is defined %} --salt "{{ icinga2_ticket_salt }}"{% endif %}
       delegate_to: "{{ icinga2_delegate_host | default(icinga2_ca_host) }}"
       register: icinga2_ticket
-      remote_user: "{{ icinga_master_ssh_user }}"
+      remote_user: "{{ hostvars[inventory_hostname].icinga_master_ssh_user }}"
       when: icinga2_ca_host != 'none'
 
     - name: get certificate
