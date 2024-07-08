@@ -206,6 +206,8 @@
       delegate_to: "{{ icinga2_delegate_host | default(icinga2_ca_host) }}"
       register: icinga2_ticket
       remote_user: "{{ hostvars[inventory_hostname].icinga_master_ssh_user }}"
+      become: yes
+      become_user: root
       when: icinga2_ca_host != 'none'
 
     - name: get certificate
