@@ -166,7 +166,7 @@
     - icinga_shared_vars.databases is defined
     - icinga_shared_vars.databases.icingadb is defined
 
-- name: Set default icinga2_ha
+- name: Set default icinga2_ha if cluster
   set_fact:
     icinga2_ha: true
   when:
@@ -174,6 +174,12 @@
     - icinga_shared_vars is defined
     - icinga_shared_vars.headends is defined
     - icinga_shared_vars.headends.headend2 is defined
+
+- name: Set default icinga2_ha if not cluster
+  set_fact:
+    icinga2_ha: false
+  when:
+    - icinga2_ha is not defined
 
 - name: Debug Icinga2 configuration variables
   debug:
