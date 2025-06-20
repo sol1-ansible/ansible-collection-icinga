@@ -24,4 +24,5 @@
   loop: "{{ icingaweb2_users }}"
   loop_control:
     loop_var: _current_user
+    label: "{{ _current_user.username }}"
   when: icingaweb2_users | length > 0

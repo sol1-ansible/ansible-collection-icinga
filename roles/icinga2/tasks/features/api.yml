@@ -52,6 +52,7 @@
   loop: "{{ result.results }}"
   loop_control:
     loop_var: idx
+    label: "Add '{{ idx.path }}' to local objects"
 
 - name: feature api Zone objects
   icinga2_object:
@@ -67,6 +68,7 @@
   loop: "{{ result.results }}"
   loop_control:
     loop_var: idx
+    label: "Add '{{ idx.path }}' to local objects"
 
 - name: create new CA
   block:

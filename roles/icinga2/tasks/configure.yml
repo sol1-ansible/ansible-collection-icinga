@@ -3,6 +3,8 @@
   set_fact:
     icinga2_dict_features: "{{ icinga2_dict_features|default({}) | combine({ item.name: item }) }}"
   with_items: "{{ icinga2_features }}"
+  loop_control:
+    label: "{{ item.name }}"
 
 - name: main config file {{ icinga2_config_path + '/icinga2.conf' }}
   template:
@@ -60,6 +62,8 @@
     state: absent
     dest: "{{ item.path }}"
   loop: "{{ result_frag.files }}"
+  loop_control:
+    label: "{{ item.path }}"
   when:
     - item.path not in icinga2_local_objects
     - item.path not in _icinga2_custom_conf_paths
@@ -94,6 +98,8 @@
     group: "{{ icinga2_group }}"
     mode: 0644
   loop: "{{ result.files }}"
+  loop_control:
+    label: "{{ item.path }}"
   notify: check-and-reload-icinga2-service
 
 - name: enable features
@@ -102,6 +108,8 @@
     path: "{{ '/etc/icinga2/features-enabled/' + icinga2_feature_realname[item.name]|default(item.name) + '.conf' }}"
     src: "{{ '../features-available/' + icinga2_feature_realname[item.name]|default(item.name) + '.conf' if (item.state is undefined or item.state != 'absent') else omit }}"
   loop: "{{ icinga2_features }}"
+  loop_control:
+    label: "{{ item.name }}"
   notify: check-and-reload-icinga2-service
 
 - name: remove empty config files
