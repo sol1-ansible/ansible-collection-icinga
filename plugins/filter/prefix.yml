@@ -1,0 +1,32 @@
+DOCUMENTATION:
+  name: prefix
+  author:
+    - Lennart Betz <lennart.betz@netways.de>
+  short_description: Prefix dictionaries / strings
+  description:
+    - Prefixes every key in dictionary with given string.
+    - Prefixes every element in list of strings with given string.
+  positional: _input
+  options:
+    _input:
+      description:
+        - Input dictionary or list of strings.
+      type: dict/list
+      required: true
+    prefix:
+      description:
+        - The prefix to apply.
+      type: string
+      required: true
+
+EXAMPLES: |
+  # my_list: [ '__hello', '__bye' ]
+  my_list: "{{ [ 'hello', 'bye' ] | netways.icinga.prefix(prefix='__') }}"
+
+  # constants: { 'const NodeName': 'example.com', 'const ZoneName': 'main' }
+  constants: "{{ {'ZoneName': 'main', 'NodeName': 'example.com'} | netways.icinga.prefix('const ') }}"
+
+RETURN:
+  _value:
+    description: The prefixed dictionary / list
+    type: dict / list
