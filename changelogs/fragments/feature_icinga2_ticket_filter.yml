@@ -1,4 +1,0 @@
----
-
-minor_changes:
-  - Add :code:`netways.icinga.icinga2_ticket` filter. This filter converts a given string (NodeName) into an Icinga2 ticket using a TicketSalt.

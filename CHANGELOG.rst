@@ -4,6 +4,27 @@ Icinga.Icinga Release Notes
 
 .. contents:: Topics
 
+v0.4.1
+======
+
+Release Summary
+---------------
+
+This release introduces Icinga for Kubernetes (thanks to @gianmarco-mameli), removes deprecation warnings present in the prior release, adds a new filter and support for the Graphite module.
+
+Major Changes
+-------------
+
+- Add a role for the installation and configuration of `Icinga for Kubernetes <https://icinga.com/docs/icinga-for-kubernetes/latest/>`_.
+- Add tasks to role :code:`icingaweb2` to install and configure `Icinga for Kubernetes Web <https://icinga.com/docs/icinga-kubernetes-web/latest/doc/02-Installation/>`_.
+
+Minor Changes
+-------------
+
+- Add :code:`netways.icinga.icinga2_ticket` filter. This filter converts a given string (NodeName) into an Icinga2 ticket using a TicketSalt.
+- Add Icinga Web 2 module :code:`Graphite`.
+- Add variable :code:`icingadb_redis_client_certificate` to define whether TLS client certificates are accepted/required/rejected when connecting to the Redis server. Only has an effect when using TLS encryption.
+
 v0.4.0
 ======
 
@@ -69,7 +90,7 @@ Bugfixes
 New Modules
 -----------
 
-- icinga.icinga.icinga2_compatlogger - Creates information for CompatLogger object.
+- netways.icinga.icinga2_compatlogger - Creates information for CompatLogger object.
 
 v0.3.4
 ======
