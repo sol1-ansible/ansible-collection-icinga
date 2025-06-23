@@ -26,12 +26,16 @@
 - icinga2_object:
     args: "{{ item }}"
   with_items: "{{ tmp_objects }}"
+  loop_control:
+    label: "{{ item.type }} '{{ item.name }}'"
   when: tmp_objects is defined
   register: result
 
 - set_fact:
     icinga2_local_objects: "{{ icinga2_local_objects|default([]) + [item.dest] }}"
   with_items: "{{ result.results }}"
+  loop_control:
+    label: "{{ item.dest }}"
   when: result.results is defined
 
 - name: prepare custom config
