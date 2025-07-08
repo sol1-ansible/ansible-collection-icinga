@@ -1,0 +1,6 @@
+---
+minor_changes:
+  - |
+    Extend condition for the API feature when using self generated certificates.
+    This avoids running the given portion of the code unnecessarily.
+    Thanks @thesefer
