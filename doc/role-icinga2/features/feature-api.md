@@ -135,13 +135,17 @@ The role will copy the files from your Ansible controller node to
 **/var/lib/icinga2/certs** on the remote host. File names are
 set to by the parameter `cert_name` (by default FQDN).
 
+If the certificates and the key are already present on the remote host,
+you can set `ssl_remote_source: true` to change the above behavior.
+
 ```yaml
 icinga2_features:
   - name: api
     cert_name: host.example.org
-    ssl_ca: /home/ansible/certs/ca.crt
+    ssl_cacert: /home/ansible/certs/ca.crt
     ssl_cert: /home/ansible/certs/host.crt
     ssl_key: /home/ansible/certs/host.key
+    ssl_remote_source: false
     endpoints:
       - name: NodeName
     zones:
@@ -161,7 +165,7 @@ icinga2_features:
 * `cert_name: string`
   * Common name of Icinga client/server instance. Default is **ansible_fqdn**.
 
-* `ssl_ca: string`
+* `ssl_cacert: string`
   * Path to the ca file when using manual certificates
 
 * `ssl_cert: string`
@@ -169,6 +173,9 @@ icinga2_features:
 
 * `ssl_key: string`
   * Path to the certificate key file when using manual certificates.
+
+* `ssl_remote_source: boolean`
+  * Whether to copy the certificates and key from the remote host instead of from the Ansible controller.
 
 * `endpoints: list of dicts`
   * Defines endpoints in **zones.conf**, each endpoint is required to have a name and optional a host or port.<br>
