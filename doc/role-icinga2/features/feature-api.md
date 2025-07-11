@@ -188,3 +188,4 @@ icinga2_features:
     * `name: string`
     * `endpoints: list`
     * `global: boolean`
+    * `parent: string`
