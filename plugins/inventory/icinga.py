@@ -329,9 +329,9 @@ class InventoryModule(BaseInventoryPlugin, Cacheable, Constructable):
                 continue
 
             # Make sure every key within filters is considered a list, cast string to single entry list
-            if isinstance(value, AnsibleMapping):
+            if isinstance(value, (AnsibleMapping, dict)):
                 value = dict(value)
-            elif isinstance(value, AnsibleSequence):
+            elif isinstance(value, (AnsibleSequence, list)):
                 value = [to_text(val) for val in value]
             else:
                 value = [to_text(value)]
@@ -358,7 +358,7 @@ class InventoryModule(BaseInventoryPlugin, Cacheable, Constructable):
                             continue
 
                         # Make sure 'attribute_values' is considered a list, cast string to single entry list
-                        if isinstance(attribute_values, AnsibleSequence):
+                        if isinstance(attribute_values, (AnsibleSequence, list)):
                             attribute_values = [to_text(val) for val in attribute_values]
                         else:
                             attribute_values = [to_text(attribute_values)]
