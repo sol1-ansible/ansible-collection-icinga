@@ -1,4 +1,0 @@
-bugfixes:
-  - |
-    The TLS configuration for Icinga DB / Icinga DB Redis has been faulty. Both configuration templates now render properly based on the given TLS related variables.
-    If using TLS in Icinga DB Redis, the non-TLS port will be disabled. The Icinga DB (daemon) configuration now uses the correct YAML key for both the TLS port and the non-TLS port.

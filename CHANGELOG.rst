@@ -4,6 +4,32 @@ Icinga.Icinga Release Notes
 
 .. contents:: Topics
 
+v0.4.2
+======
+
+Release Summary
+---------------
+
+Small quality of life & bugfix release.
+
+Minor Changes
+-------------
+
+- Extend condition for the API feature when using self generated certificates.
+  This avoids running the given portion of the code unnecessarily.
+  Thanks @thesefer
+- For Icinga2 certificates and key file permissions are now set explicitly when using self generated certificates (**0644** and **0600** respectively).
+- The Icinga2 API feature now allows for the use of certificates already present on the remote host.
+  This means that certificates (and the key) no longer have to be present on the Ansible controller
+  which allows for more flexibility when it comes to certificate deployment.
+  The new behavior can be activated by setting :code:`ssl_remote_source: true` within the API feature.
+
+Bugfixes
+--------
+
+- The TLS configuration for Icinga DB / Icinga DB Redis has been faulty. Both configuration templates now render properly based on the given TLS related variables.
+  If using TLS in Icinga DB Redis, the non-TLS port will be disabled. The Icinga DB (daemon) configuration now uses the correct YAML key for both the TLS port and the non-TLS port.
+
 v0.4.1
 ======
 

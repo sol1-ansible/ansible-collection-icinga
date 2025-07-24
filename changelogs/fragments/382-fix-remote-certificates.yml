@@ -1,7 +1,0 @@
-minor_changes:
-  - |
-    The Icinga2 API feature now allows for the use of certificates already present on the remote host.
-    This means that certificates (and the key) no longer have to be present on the Ansible controller
-    which allows for more flexibility when it comes to certificate deployment.
-    The new behavior can be activated by setting :code:`ssl_remote_source: true` within the API feature.
-  - For Icinga2 certificates and key file permissions are now set explicitly when using self generated certificates (**0644** and **0600** respectively).
