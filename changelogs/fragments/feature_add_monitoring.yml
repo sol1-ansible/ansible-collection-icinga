@@ -1,0 +1,4 @@
+---
+bugfixes:
+  - Add internal modules to installable modules list. This allows for modules directly shipped with Icinga Web 2 to be configurable.
+    This mostly affects the :code:`monitoring` module since it has actual configuration options. Others like :code:`setup` can now be enabled/disabled.
