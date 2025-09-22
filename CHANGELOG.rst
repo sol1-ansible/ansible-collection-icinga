@@ -4,6 +4,31 @@ Icinga.Icinga Release Notes
 
 .. contents:: Topics
 
+v0.4.3
+======
+
+Release Summary
+---------------
+
+Small bugfix release mostly regarding databases and Icinga Web 2.
+
+Bugfixes
+--------
+
+- Add internal modules to installable modules list. This allows for modules directly shipped with Icinga Web 2 to be configurable. This mostly affects the :code:`monitoring` module since it has actual configuration options. Others like :code:`setup` can now be enabled/disabled.
+- Fix issue where the package for any given Icinga Web 2 module was not installed if that module had set :code:`enabled: false`.
+  Modules are now installed and configured properly even when they are set to be disabled in the end.
+- Fixed an issue where the :code:`config.ini` file of the :code:`monitoring` module was not deployed.
+- More complex database passwords have been an issue when importing database schemas. The passwords are now properly quoted using the :code:`quote` filter.
+  This means that passwords containing characters such as :code:`#` and :code:`\ ` should now work correctly.
+
+  The change affects Icinga 2 (IDO), Icinga for Kubernetes, Icinga DB and Icinga Web 2.
+- Switch from :code:`run_once: true` to :code:`throttle: 1` when applying database schema.
+  The initial intention was to apply the schema once per cluster. However, if nodes are independent, e.g. multiple clusters, this would still only run on the first host, leaving the other node(s) with empty databases.
+
+  The tasks are rewritten to now check whether the schema needs to be applied before trying to do so.
+  This happens one host at a time. Thus, the tasks take slightly more time but work when using multiple clusters.
+
 v0.4.2
 ======
 
