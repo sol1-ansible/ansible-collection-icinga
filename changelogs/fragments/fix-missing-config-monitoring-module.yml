@@ -1,2 +1,0 @@
-bugfixes:
-  - Fixed an issue where the :code:`config.ini` file of the :code:`monitoring` module was not deployed.
