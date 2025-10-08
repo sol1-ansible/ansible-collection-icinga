@@ -1,0 +1,2 @@
+minor_changes:
+  - In the :code:`icinga2` role objects are collected from different places before writing them to files. Duplicates could occur which was not taken care of. All collected objects are now deduplicated using the :code:`unique` filter right before writing to save some time during execution.
