@@ -146,8 +146,8 @@ keyed_groups:
 
 
 
-#class InventoryModule(BaseInventoryPlugin):
 class InventoryModule(BaseInventoryPlugin, Cacheable, Constructable):
+    # pylint: disable=too-many-ancestors
     NAME = 'icinga'
 
     def verify_file(self, path):
@@ -364,6 +364,7 @@ class InventoryModule(BaseInventoryPlugin, Cacheable, Constructable):
                             attribute_values = [to_text(attribute_values)]
 
                         # Choose correct filter
+                        tmp_string = ''
                         if sub_key == 'match':
                             tmp_string = self._create_match_filter(f'vars.{attribute_key}', attribute_values)
                         elif sub_key == 'in':

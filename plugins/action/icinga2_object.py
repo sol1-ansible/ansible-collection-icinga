@@ -27,6 +27,7 @@ class ActionModule(ActionBase):
                 'The \'order\' parameter for different object types is deprecated. It no longer has any effect.'
             )
 
+        # pylint: disable=too-many-nested-blocks
         for args in arguments['objects']:
             args = merge_hash(args.pop('args', {}), args)
             object_type = args.pop('type', None)
