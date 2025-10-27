@@ -4,6 +4,56 @@ Icinga.Icinga Release Notes
 
 .. contents:: Topics
 
+v0.4.4
+======
+
+Release Summary
+---------------
+
+Introduction of Icinga for Windows role :code:`ifw` and performance increase in deployment of :code:`icinga2_objects`.
+
+Major Changes
+-------------
+
+- Introduction of role :code:`ifw` - Icinga for Windows: This role allows to install the Icinga PowerShell Framework, manage components and repositories, and install and configure Icinga 2 through Icinga for Windows.
+- Module :code:`ifw_backgrounddaemon`: Registers/unregisters an Icinga for Windows background daemon.
+- Module :code:`ifw_component`: Installs/removes/updates Icinga for Windows components (e.g. :code:`agent`, :code:`plugins`).
+- Module :code:`ifw_restapicommand`: Adds/removes commands to/from the whitelist/blacklist of the Icinga for Windows REST-Api.
+- The performance of the action plugin :code:`icinga2_object` has been greatly improved.
+  Instead of writing individual objects to files and later merging them,
+  they are instead now merged in memory on a per destination basis.
+  This means that configuration files no longer have to be assembled after the fact.
+
+  This also drops the :code:`order` parameter previously used to define the order in which
+  objects are written if they belong to the same destination file.
+  The new behavior only changes the order in the files but does not change the end result.
+
+  A performance gain of up to 80% has been seen in testing.
+
+Minor Changes
+-------------
+
+- In the :code:`icinga2` role objects are collected from different places before writing them to files. Duplicates could occur which was not taken care of. All collected objects are now deduplicated using the :code:`unique` filter right before writing to save some time during execution.
+- The deb repositories made available by the :code:`repos` role now use the `deb822 format <https://repolib.readthedocs.io/en/latest/deb822-format.html>`__. This can lead to APT warnings on systems that already have the repositories deployed using the old format (sources.list). To fix this, simply remove the old :code:`icinga.list` file after the repositories have been deployed in the new format.
+- The error messages about unsupported operating systems have been tuned. They should now appear if and only if the actual OS is in fact not supported instead of appearing after unrelated task failures.
+
+Bugfixes
+--------
+
+- :code:`icingaweb2_roles` was not deployed at all if :code:`icingaweb2_admin_username` and :code:`icingaweb2_admin_password` were missing. Now for both, the predefined admin role and user-defined :code:`icingaweb2_roles`, the respective variables are tested for correctly when creating :code:`roles.ini`. Thus, the creation of an initial admin user is no longer strictly necessary.
+- A short example for the previously undocumented :code:`icingaweb2_roles` has been added.
+
+Known Issues
+------------
+
+- With the changes in :code:`icinga2_object` arises a problem.
+  The prior directory structure within :code:`icinga2_fragments_path` (default: :code:`/var/tmp/icinga/`) does not fit the new approach for writing configuration files.
+  Some paths that would become directories before are now treated as files.
+  If the old directory structure is present on a remote host, deployment with the new method will most likely fail due to this.
+
+  If the execution of :code:`icinga2_object` fails, deleting :code:`icinga2_fragments_path` should fix the problem.
+  This, however, is a manual step that needs to be done.
+
 v0.4.3
 ======
 
@@ -20,7 +70,7 @@ Bugfixes
   Modules are now installed and configured properly even when they are set to be disabled in the end.
 - Fixed an issue where the :code:`config.ini` file of the :code:`monitoring` module was not deployed.
 - More complex database passwords have been an issue when importing database schemas. The passwords are now properly quoted using the :code:`quote` filter.
-  This means that passwords containing characters such as :code:`#` and :code:`\ ` should now work correctly.
+  This means that passwords containing characters such as :code:`#` and :code:`\\` should now work correctly.
 
   The change affects Icinga 2 (IDO), Icinga for Kubernetes, Icinga DB and Icinga Web 2.
 - Switch from :code:`run_once: true` to :code:`throttle: 1` when applying database schema.
