@@ -1,0 +1,2 @@
+bugfixes:
+  - "Fix automatic determination of IfW framework path (:code:`ifw_framework_path`)."
