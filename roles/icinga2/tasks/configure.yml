@@ -104,30 +104,6 @@
     state: absent
     dest: "{{ item }}"
 
-- name: Remove empty config dirs (icinga2_config_path) # noqa: command-instead-of-shell
-  when: icinga2_config_directories is defined
-  vars:
-    _icinga2_config_directories: "{{
-      (
-        (icinga2_config_directories | select('match', '^conf.d/.*')) +
-        (icinga2_config_directories | select('match', '^zones.d/.*')) +
-        ((icinga2_config_directories | select('match', '^' + [icinga2_confd, '.*'] | path_join)) if icinga2_confd is string else [])
-      ) | netways.icinga.prefix(prefix=icinga2_config_path + '/') | join(' ')
-    }}"
-  ansible.builtin.shell:
-    cmd: |
-      for path in {{ _icinga2_config_directories }}
-      do
-        if [ -d "$path" ]; then
-          find "$path" -mindepth 1 -type d -empty -print -exec rmdir {} +
-        fi
-      done
-  register: _removed_dirs
-  until: _removed_dirs.stdout_lines | length == 0
-  retries: 100
-  delay: 0
-  changed_when: _removed_dirs.attempts > 1
-
 - name: collect config files
   find:
     path: "{{ icinga2_fragments_path }}"
@@ -158,3 +134,27 @@
   loop_control:
     label: "{{ item.name }}"
   notify: check-and-reload-icinga2-service
+
+- name: Remove empty config dirs (icinga2_config_path) # noqa: command-instead-of-shell
+  when: icinga2_config_directories is defined
+  vars:
+    _icinga2_config_directories: "{{
+      (
+        (icinga2_config_directories | select('match', '^conf.d/.*')) +
+        (icinga2_config_directories | select('match', '^zones.d/.*')) +
+        ((icinga2_config_directories | select('match', '^' + [icinga2_confd, '.*'] | path_join)) if icinga2_confd is string else [])
+      ) | netways.icinga.prefix(prefix=icinga2_config_path + '/') | join(' ')
+    }}"
+  ansible.builtin.shell:
+    cmd: |
+      for path in {{ _icinga2_config_directories }}
+      do
+        if [ -d "$path" ]; then
+          find "$path" -mindepth 1 -type d -empty -print -exec rmdir {} +
+        fi
+      done
+  register: _removed_dirs
+  until: _removed_dirs.stdout_lines | length == 0
+  retries: 100
+  delay: 0
+  changed_when: _removed_dirs.attempts > 1
