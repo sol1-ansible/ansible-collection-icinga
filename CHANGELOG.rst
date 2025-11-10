@@ -4,6 +4,23 @@ Icinga.Icinga Release Notes
 
 .. contents:: Topics
 
+v0.4.5
+======
+
+Release Summary
+---------------
+
+Small bugfix release.
+
+Bugfixes
+--------
+
+- Empty config directories are now cleaned up **after** config assembly within the :code:`icinga2` role. This should avoid leftover files from previous deployments.
+- Fix automatic determination of IfW framework path (:code:`ifw_framework_path`).
+- Fix quoting of password within mysql command for IDO database schema import.
+- Use explicit booleans in conditions inside of role :code:`monitoring_plugins` for compatibility with :code:`ansible-core >= 2.19`. Thanks @gianmarco-mameli
+- Using :code:`ansible.windows.win_powershell` for the :code:`Install-Icinga` command can sometimes get stuck and stay idle indefinitely. The according task now uses :code:`ansible.windows.win_shell` as this seems to be more reliable.
+
 v0.4.4
 ======
 
