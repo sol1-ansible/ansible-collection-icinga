@@ -1,2 +1,0 @@
-bugfixes:
-  - "Fix quoting of password within mysql command for IDO database schema import."

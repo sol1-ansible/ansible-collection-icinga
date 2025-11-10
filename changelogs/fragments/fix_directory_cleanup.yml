@@ -1,2 +1,0 @@
-bugfixes:
-  - "Empty config directories are now cleaned up **after** config assembly within the :code:`icinga2` role. This should avoid leftover files from previous deployments."
