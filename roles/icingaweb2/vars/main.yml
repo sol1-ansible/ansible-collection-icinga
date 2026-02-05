@@ -2,5 +2,12 @@
 icingaweb2_module_packages:
   icingadb: icingadb-web
   director: icinga-director
+  graphite: icinga-graphite-web
   x509: icinga-x509
   businessprocess: icinga-businessprocess
+  kubernetes: icinga-kubernetes-web
+  monitoring: icingaweb2
+  doc: icingaweb2
+  migrate: icingaweb2
+  setup: icingaweb2
+  translation: icingaweb2

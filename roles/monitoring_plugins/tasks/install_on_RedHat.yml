@@ -12,9 +12,9 @@
     name: "{{ needed_packages }}"
     update_cache: true
   when:
-    - ansible_distribution_major_version < "8"
+    - ansible_facts["distribution_major_version"] | int < 8
     - needed_packages is defined
-    - needed_packages
+    - needed_packages | length > 0
 
 - name: Dnf - install requested packages
   become: yes
@@ -24,9 +24,9 @@
     update_cache: true
     enablerepo: "{{ icinga_monitoring_plugins_dependency_repos }}"
   when:
-    - ansible_distribution_major_version >= "8"
+    - ansible_facts["distribution_major_version"] | int >= 8
     - needed_packages is defined
-    - needed_packages
+    - needed_packages | length > 0
 
 - name: Yum - remove non-requested packages
   become: yes
@@ -36,4 +36,4 @@
     autoremove: "{{ icinga_monitoring_plugins_autoremove }}"
   when:
     - icinga_monitoring_plugins_remove
-    - unwanted_packages
+    - unwanted_packages | length > 0

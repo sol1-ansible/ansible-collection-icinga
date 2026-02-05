@@ -5,25 +5,24 @@
     icinga2_import_schema: "{{ icinga2_dict_features.idopgsql.import_schema| default(False) }}"
 
 - name: feature idopgsql IdoPgsqlConnection object
-  icinga2_object:
-    name: ido-pgsql
-    type: IdoPgsqlConnection
-    file: features-available/ido-pgsql.conf
-    args: "{{ icinga2_dict_features.idopgsql }}"
-  register: result
+  ansible.builtin.set_fact:
+    tmp_objects: "{{ tmp_objects | default([]) + objects }}"
+  vars:
+    objects:
+      - name: ido-pgsql
+        type: IdoPgsqlConnection
+        file: features-available/ido-pgsql.conf
+        args: "{{ icinga2_dict_features.idopgsql }}"
 
-- set_fact:
-    icinga2_local_objects: "{{ icinga2_local_objects|default([]) + [result.dest] }}"
-
-- name: install on {{ ansible_os_family }}
-  include_tasks: "features/idopgsql/install_on_{{ ansible_os_family }}.yml"
+- name: "install on {{ ansible_facts['os_family'] }}"
+  include_tasks: "features/idopgsql/install_on_{{ ansible_facts['os_family'] }}.yml"
 
 - name: PostgreSQL import IDO schema
   block:
     - name: build psql command
       set_fact:
         psqlcmd: >-
-          PGPASSWORD="{{ icinga2_dict_features.idopgsql.password }}"
+          PGPASSWORD={{ icinga2_dict_features.idopgsql.password | quote }}
           psql
           "host={{ icinga2_dict_features.idopgsql.host| default('localhost') }}
           port={{ icinga2_dict_features.idopgsql.port| default('5432') }}

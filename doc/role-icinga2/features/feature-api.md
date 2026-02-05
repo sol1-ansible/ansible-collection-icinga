@@ -10,7 +10,7 @@ All non Icinga attributes to configure the feature are explained below.
 
 Example how to install an Agent:
 
-```
+```yaml
 icinga2_features:
   - name: api
     force_newcert: false
@@ -25,7 +25,7 @@ icinga2_features:
 
 Example how to install a master/server instance:
 
-```
+```yaml
 icinga2_features:
   - name: api
     force_newcert: false
@@ -42,7 +42,7 @@ icinga2_features:
 
 To create an instance with a local CA, the API Feature parameter `ca_host` should be `none`.
 
-```
+```yaml
 ca_host: none
 ```
 
@@ -77,7 +77,7 @@ icinga2_features:
 icinga2_delegate_host: icinga-satellite.localdomain
 ```
 Example if agent should connect to satellite and the tickets are generated on the
-master host. 
+master host.
 
 ```yaml
 icinga2_features:
@@ -91,19 +91,19 @@ icinga2_delegate_host: icinga-master.localdomain
 By default the FQDN is used as certificate common name, to put a name
 yourself:
 
-```
+```yaml
 cert_name: myown-commonname.fqdn
 ```
 
 To force a new request set `force_newcert` to `true`:
 
-```
+```yaml
 force_newcert: true
 ```
 
 To increase your security set `ca_fingerprint` to validate the certificate of the `ca_host`:
 
-```
+```yaml
 ca_fingerprint: "00 DE AD BE EF"
 # alternatively
 ca_fingerprint: "00:DE:AD:BE:EF"
@@ -113,7 +113,7 @@ ca_fingerprint: "00 de ad be ef"
 
 The fingerprint can be retrieved with OpenSSL:
 
-```
+```bash
 openssl x509 -noout -fingerprint -sha256 -inform pem -in /path/to/ca.crt
 ```
 
@@ -122,8 +122,8 @@ openssl x509 -noout -fingerprint -sha256 -inform pem -in /path/to/ca.crt
 If you want to use certificates which aren't created by **Icinga 2 CA**, then use
 the following variables to point the role to your own certificates.
 
-```
-ssl_ca: ca.crt
+```yaml
+ssl_cacert: ca.crt
 ssl_cert: certificate.crt
 ssl_key: certificate.key
 ```
@@ -135,13 +135,17 @@ The role will copy the files from your Ansible controller node to
 **/var/lib/icinga2/certs** on the remote host. File names are
 set to by the parameter `cert_name` (by default FQDN).
 
-```
+If the certificates and the key are already present on the remote host,
+you can set `ssl_remote_source: true` to change the above behavior.
+
+```yaml
 icinga2_features:
   - name: api
     cert_name: host.example.org
-    ssl_ca: /home/ansible/certs/ca.crt
+    ssl_cacert: /home/ansible/certs/ca.crt
     ssl_cert: /home/ansible/certs/host.crt
     ssl_key: /home/ansible/certs/host.key
+    ssl_remote_source: false
     endpoints:
       - name: NodeName
     zones:
@@ -159,9 +163,9 @@ icinga2_features:
   * Force new certificates on the destination hosts.
 
 * `cert_name: string`
-  * Common name of Icinga client/server instance. Default is **ansible_fqdn**.
+  * Common name of Icinga client/server instance. Default is **ansible_facts['fqdn']**.
 
-* `ssl_ca: string`
+* `ssl_cacert: string`
   * Path to the ca file when using manual certificates
 
 * `ssl_cert: string`
@@ -170,8 +174,11 @@ icinga2_features:
 * `ssl_key: string`
   * Path to the certificate key file when using manual certificates.
 
+* `ssl_remote_source: boolean`
+  * Whether to copy the certificates and key from the remote host instead of from the Ansible controller.
+
 * `endpoints: list of dicts`
-  * Defines endpoints in **zones.conf**, each endpoint is required to have a name and optional a host or port.  
+  * Defines endpoints in **zones.conf**, each endpoint is required to have a name and optional a host or port.<br>
     * `name: string`
     * `host: string`
     * `port: number`
@@ -181,3 +188,4 @@ icinga2_features:
     * `name: string`
     * `endpoints: list`
     * `global: boolean`
+    * `parent: string`

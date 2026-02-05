@@ -1,0 +1,15 @@
+---
+
+- name: PostgreSQL check for icingaweb db schema
+  ansible.builtin.shell: >
+    {{ _tmp_pgsqlcmd }}
+    -w -c "select * from icingaweb_user" ||
+    (
+      {{ _tmp_pgsqlcmd }} -w -f /usr/share/icingaweb2/schema/pgsql.schema.sql &&
+      echo "Schema imported"
+    )
+  register: _icingaweb_schema
+  changed_when:
+    - '"Schema imported" in _icingaweb_schema.stdout_lines'
+  throttle: 1
+

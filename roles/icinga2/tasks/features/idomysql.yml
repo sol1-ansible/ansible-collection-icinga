@@ -5,18 +5,17 @@
     icinga2_import_schema: "{{ icinga2_dict_features.idomysql.import_schema| default(False) }}"
 
 - name: feature idomysql IdoMysqlConnection object
-  icinga2_object:
-    name: ido-mysql
-    type: IdoMysqlConnection
-    file: features-available/ido-mysql.conf
-    args: "{{ icinga2_dict_features.idomysql }}"
-  register: result
+  ansible.builtin.set_fact:
+    tmp_objects: "{{ tmp_objects | default([]) + objects }}"
+  vars:
+    objects:
+      - name: ido-mysql
+        type: IdoMysqlConnection
+        file: features-available/ido-mysql.conf
+        args: "{{ icinga2_dict_features.idomysql }}"
 
-- set_fact:
-    icinga2_local_objects: "{{ icinga2_local_objects|default([]) + [result.dest] }}"
-
-- name: install on {{ ansible_os_family }}
-  include_tasks: "features/idomysql/install_on_{{ ansible_os_family }}.yml"
+- name: "install on {{ ansible_facts['os_family'] }}"
+  include_tasks: "features/idomysql/install_on_{{ ansible_facts['os_family'] }}.yml"
 
 # Hint: For MySQL the client-side --ssl option is deprecated as of MySQL 5.7.11 and is removed in MySQL 8.0. For client programs, use --ssl-mode instead
 # However, MariaDB currently does not offer a --ssl-mode option, MariaDB enables --ssl automatically with other flags
@@ -34,7 +33,7 @@
           {% if icinga2_dict_features.idomysql.ssl_cipher is defined %} --ssl-cipher "{{ icinga2_dict_features.idomysql.ssl_cipher }}" {%- endif %}
           {% if icinga2_dict_features.idomysql.extra_options is defined %} {{ icinga2_dict_features.idomysql.extra_options }} {%- endif %}
           -u "{{ icinga2_dict_features.idomysql.user | default('icinga2') }}"
-          -p"{{ icinga2_dict_features.idomysql.password }}"
+          -p{{ icinga2_dict_features.idomysql.password | quote }}
           "{{ icinga2_dict_features.idomysql.database | default('icinga2') }}"
 
     - name: MySQL check for IDO schema
