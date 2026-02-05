@@ -1,6 +1,4 @@
 ---
-- gather_facts:
-
 - name: Include OS specific vars
   include_vars: "{{ lookup('first_found', params) }}"
   vars:
@@ -14,10 +12,10 @@
       paths:
         - "{{ role_path }}/vars"
 
-- name: install
+- name: Install Icinga
   include_tasks: install.yml
 
-- name: configure
+- name: Configure
   include_tasks: configure.yml
 
 - name: manage service

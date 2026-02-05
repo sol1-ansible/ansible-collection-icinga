@@ -1,12 +1,12 @@
 ---
-- name: populate features (icinga2_dict_features)
+- name: Populate features (icinga2_dict_features)
   set_fact:
     icinga2_dict_features: "{{ icinga2_dict_features|default({}) | combine({ item.name: item }) }}"
   with_items: "{{ icinga2_features }}"
   loop_control:
     label: "{{ item.name }}"
 
-- name: main config file {{ icinga2_config_path + '/icinga2.conf' }}
+- name: Write out main config file {{ icinga2_config_path + '/icinga2.conf' }}
   template:
     src: icinga2.conf.j2
     dest: "{{ icinga2_config_path + '/icinga2.conf' }}"
@@ -14,11 +14,11 @@
     group: "{{ icinga2_group }}"
   notify: check-and-reload-icinga2-service
 
-- name: merge defaults and user specified constants (set_fact icinga2_combined_constants)
+- name: Merge defaults and user specified constants (set_fact icinga2_combined_constants)
   set_fact:
     icinga2_combined_constants: "{{ icinga2_default_constants | combine(icinga2_constants) }}"
 
-- name: set constants in {{ icinga2_config_path + '/constants.conf' }}
+- name: Set constants in {{ icinga2_config_path + '/constants.conf' }}
   ansible.builtin.template:
     src: constants.conf.j2
     dest: "{{ icinga2_config_path + '/constants.conf' }}"
@@ -26,13 +26,13 @@
     group: "{{ icinga2_group }}"
   notify: check-and-reload-icinga2-service
 
-- name: features
+- name: Include features task
   include_tasks: features.yml
 
-- name: objects
+- name: Include objects task
   include_tasks: objects.yml
 
-- name: ensure monitoring config directories
+- name: Ensure monitoring config directories
   ansible.builtin.file:
     path: "{{ icinga2_config_path }}/{{ item }}"
     state: directory
@@ -104,7 +104,7 @@
     state: absent
     dest: "{{ item }}"
 
-- name: collect config files
+- name: Collect config files
   find:
     path: "{{ icinga2_fragments_path }}"
     recurse: yes
@@ -125,7 +125,7 @@
     label: "{{ item.path }}"
   notify: check-and-reload-icinga2-service
 
-- name: enable features
+- name: Enable features
   file:
     state: "{{ 'link' if (item.state is undefined or item.state != 'absent') else 'absent' }}"
     path: "{{ '/etc/icinga2/features-enabled/' + icinga2_feature_realname[item.name]|default(item.name) + '.conf' }}"

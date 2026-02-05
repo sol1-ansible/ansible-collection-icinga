@@ -1,0 +1,202 @@
+---
+- name: Find the matching headend
+  set_fact:
+    matching_headend: "{{ item.key }}"
+  when: 
+    - item.value.name is defined
+    - item.value.name == inventory_hostname
+  with_dict: "{{ icinga_shared_vars.headends }}"
+
+- name: Set Default icinga2_confd
+  set_fact:
+    icinga2_confd: "local.d"
+
+- name: Set Default icinga2_config_global_directories
+  set_fact:
+    icinga2_config_global_directories:
+      - "zones.d/global/"
+      - "zones.d/director-global/"
+  when: 
+    - icinga2_config_global_directories is not defined
+
+- name: Set Default icinga2_config_directories
+  set_fact:
+    icinga2_config_directories: "{{ [icinga2_confd + '/'] + icinga2_config_global_directories }}"
+  when: 
+    - icinga2_config_directories is not defined
+
+- name: Set Default icinga_shared_var_headend_features
+  set_fact:
+    icinga_shared_var_headend_features: 
+      api: 
+      checker: 
+      command: 
+      notification: 
+      mainlog: 
+  when: 
+    - icinga_shared_var_headend_features is not defined
+
+- name: Set Default icinga_shared_var_headend_features
+  set_fact:
+    icinga_shared_var_headend_features: 
+      api: "{{ icinga_shared_var_headend_features.api }}"
+      checker: "{{ icinga_shared_var_headend_features.checker }}"
+      command: "{{ icinga_shared_var_headend_features.command }}"
+      notification: "{{ icinga_shared_var_headend_features.notification }}"
+      mainlog: "{{ icinga_shared_var_headend_features.mainlog }}"
+      icingadb: 
+        password: "{{ icinga_shared_vars.headends[matching_headend].redis_password }}"
+        port: "{{ icinga_shared_vars.headends[matching_headend].redis_port | default(6380) }}"
+  when: 
+    - icinga_shared_var_headend_features is defined
+    - icinga_shared_vars is defined
+    - icinga_shared_vars.databases is defined
+    - icinga_shared_vars.databases.icingadb is defined
+
+- name: default icinga2_features
+  var_icinga2_features:
+    my_endpoints: "{{ icinga_shared_vars['headends'] }}"
+    config_directories: "{{ icinga2_config_global_directories }}"
+    features: "{{ icinga_shared_var_headend_features }}"
+    common_name: "{{ inventory_hostname }}"
+  register: _icinga2_features
+  
+- name: merge default _icinga2_features with any userset icinga2_features
+  set_fact:
+    icinga2_features: "{{ _icinga2_features.built }}"
+    # icinga2_features: "{{ _icinga2_features.built | combine(icinga2_features | default({}, true), recursive=True) }}"
+
+- name: Set default icingadb_database_import_schema
+  set_fact:
+    icingadb_database_import_schema: false  # needed by the schema import
+  when:
+    - icingadb_database_import_schema is not defined
+
+- name: Set default icingadb_database_import_schema
+  set_fact:
+    icingadb_database_import_schema: true  # needed by the schema import
+  when:
+    - matching_headend == 'headend1'
+
+# - name: Set default icingadb_database_import_schema
+#   set_fact:
+#     icingadb_database_import_schema: "{{ _icingadb_database_import_schema }}"  # needed by the schema import
+#   when:
+#     - icingadb_database_import_schema is not defined
+
+- name: Set default icinga2_constants
+  set_fact:
+    icinga2_constants: 
+      NodeName: "{{ inventory_hostname }}"
+      ZoneName: "{{ icinga_shared_vars.headends.zone }}"
+      TicketSalt: "{{ icinga_shared_vars.headends[matching_headend].salt | default(matching_headend + lookup('community.general.random_string', 60, 'upperalpha,digits')) }}"
+  when:
+    - icinga_shared_vars is defined
+    - icinga_shared_vars.headends is defined
+    - icinga_shared_vars.headends.zone is defined
+
+- name: Set default _icinga2_objects
+  set_fact:
+    _icinga2_objects:
+      - name: "{{ icinga_shared_vars.headends[matching_headend].api_user }}"
+        type: ApiUser
+        file: "{{ icinga2_confd }}/api-users.conf"
+        password: "{{ icinga_shared_vars.headends[matching_headend].api_password }}"
+        permissions: 
+          - "*"
+
+- name: merge default _icinga2_objects with any userset icinga2_objects
+  set_fact:
+    icinga2_objects: "{{ _icinga2_objects + (icinga2_objects | default([], true)) }}"
+
+- block:
+  - name: Set default icingadb_database_type
+    set_fact:
+      icingadb_database_type: "{{ icinga_shared_vars.databases.icingadb.type | default('mysql') }}"  # needed by the schema import
+    when:
+      - icingadb_database_type is not defined
+
+  - name: Set default icingadb_database_host
+    set_fact:
+      icingadb_database_host: "{{ icinga_shared_vars.databases.icingadb.host | default(icingadb_database_host) | default('localhost') }}"
+
+  - name: Set default icingadb_database_port
+    set_fact:
+      icingadb_database_port: "{{ icinga_shared_vars.databases.icingadb.port | default(icingadb_database_port) | default('3306') }}"
+
+  - name: Set default icingadb_database_user
+    set_fact:
+      icingadb_database_user: "{{ icinga_shared_vars.databases.icingadb.user }}"
+    when:
+      - icingadb_database_user is not defined
+      - icinga_shared_vars.databases.icingadb.user is defined
+
+  - name: Set default icingadb_database_user
+    set_fact:
+      icingadb_database_user: "{{ icinga_shared_vars.databases.icingadb.dbname | default('icingadb') }}"
+    when:
+      - icingadb_database_user is not defined
+
+  - name: Set default icingadb_database_password
+    set_fact:
+      icingadb_database_password: "{{ icinga_shared_vars.databases.icingadb.password | default(icingadb_database_password) }}"
+    when:
+      - icinga_shared_vars.databases.icingadb.password is defined
+
+  - name: Set default icingadb_redis_binds
+    set_fact:
+      icingadb_redis_binds: [ "0.0.0.0" ]
+    # when:
+    #   - icingadb_redis_binds is not defined
+
+  - name: Set default icingadb_redis_port
+    set_fact:
+      icingadb_redis_port: "6380"
+    # when:
+    #   - icingadb_redis_port is not defined
+
+  - name: Set default icingadb_redis_password
+    set_fact:
+      icingadb_redis_password: "{{ icinga_shared_vars.headends[matching_headend].redis_password | default('MISSING') }}"
+    when:
+      - icingadb_redis_password is not defined
+
+  when:
+    - icinga_shared_vars is defined
+    - icinga_shared_vars.databases is defined
+    - icinga_shared_vars.databases.icingadb is defined
+
+- name: Set default icinga2_ha if cluster
+  set_fact:
+    icinga2_ha: true
+  when:
+    - icinga2_ha is not defined
+    - icinga_shared_vars is defined
+    - icinga_shared_vars.headends is defined
+    - icinga_shared_vars.headends.headend2 is defined
+
+- name: Set default icinga2_ha if not cluster
+  set_fact:
+    icinga2_ha: false
+  when:
+    - icinga2_ha is not defined
+
+- name: Debug Icinga2 configuration variables
+  debug:
+    msg:
+      - "icinga2_features: {{ icinga2_features }}"
+      - "icinga2_ha: {{ icinga2_ha }}"
+      - "icinga2_confd: {{ icinga2_confd }}"
+      - "icinga2_config_directories: {{ icinga2_config_directories }}"
+      - "icingadb_database_type: {{ icingadb_database_type }}"
+      - "icingadb_database_host: {{ icingadb_database_host }}"
+      - "icingadb_database_port: {{ icingadb_database_port }}"
+      - "icingadb_database_user: {{ icingadb_database_user }}"
+      - "icingadb_database_password: {{ icingadb_database_password }}"
+      - "icingadb_redis_binds: {{ icingadb_redis_binds }}"
+      - "icingadb_redis_port: {{ icingadb_redis_port }}"
+      - "icingadb_redis_password: {{ icingadb_redis_password }}"
+      - "icingadb_database_import_schema: {{ icingadb_database_import_schema }}"
+      - "icinga2_constants: {{ icinga2_constants }}"
+      - "icinga2_objects: {{ icinga2_objects }}"
+

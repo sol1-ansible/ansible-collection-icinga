@@ -27,6 +27,11 @@
   ansible.builtin.set_fact:
     tmp_objects: "{{ (tmp_objects | default([])) | unique }}"
 
+- name: collect all config objects in host
+  set_fact:
+    tmp_objects: "{{ tmp_objects| default([]) + lookup('list', hostvars[inventory_hostname]['icinga2_objects']) }}"
+  when: hostvars[inventory_hostname]['icinga2_objects'] is defined
+
 - icinga2_object:
     objects: "{{ tmp_objects }}"
   when: tmp_objects is defined
@@ -36,7 +41,7 @@
     icinga2_local_objects: "{{ icinga2_local_objects | default([]) + result.destinations }}"
   when: result.destinations is defined
 
-- name: prepare custom config
+- name: Prepare custom config
   when: icinga2_custom_config is defined and icinga2_custom_config|length > 0
   block:
     - name: construct _icinga2_custom_conf_paths
@@ -57,7 +62,7 @@
         mode: 0755
         path: "{{ _directory_path }}"
 
-    - name: add custom config to assemble
+    - name: Add custom config to assemble
       ansible.builtin.copy:
         owner: root
         group: root
