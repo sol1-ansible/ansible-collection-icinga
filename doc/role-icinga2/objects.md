@@ -7,8 +7,9 @@ generate configuration files with objects included.
 
 This variable consists of Icinga 2 object attributes and attributes referring to the file created in the process.
 
-> **_NOTE:_** The second level of the dictionary defines on which host the configuration is created. All objects in the example below, will be gathered and deployed on the host.: `host.example.org`.
-In addition this variable can be logically defined at the **host_vars/agent** and are still deployed on the master **host.example.org**
+> **_NOTE:_** The second level of the dictionary defines on which host the configuration is created. All objects in the example below, will be gathered and deployed on the host.: `host.example.org`.<br>
+In addition this variable can be logically defined at the **host_vars/agent** and are still deployed on the master **host.example.org**.<br>
+The second level can **only** be used in **hostvars**!
 
 The `file` key will be used to control in which directory structure the object will be placed.
 In addition the `order` key will define the order of the objects in the destination file.
@@ -16,46 +17,119 @@ The default for `order` is set to **10**, so everything below that number will b
 
 The `type` will be the original Icinga 2 object types, a list of all can be found in the documentation. [Icinga 2 Monitoring Objects](https://icinga.com/docs/icinga-2/latest/doc/09-object-types/#monitoring-objects)
 
+### Icinga2 Objects in Hostvars
+
+When defining `icinga2_objects` as a host specific variable (hostvars/groupvars) you can define the variable as a dictionary. Each dictionary key represents the host on which the key's value will be deployed as configuration.<br>
+Alternatively you can define `icinga2_objects` as a list which results in the configuration being deployed on just the host for which the variable is defined.
+
+Because it's easily overlooked, here are few more words of clarification: The first example shows variables of the host `webserver.example.org` but the `icinga2_objects` variable includes `host.example.org` and an extra level of indentation. This means that the following configuration will not be deployed on `webserver.example.org` but on `host.example.org`. This is especially useful when defining host objects on agents but "sending" them to the central nodes.
+
+Example defining the variable within hostvars as a dictionary (inventory entry):
+
+```yaml
+webserver.example.org:
+  ansible_host: 10.0.0.8
+  icinga2_objects:
+    host.example.org:
+      - name: "{{ inventory_hostname }}"
+        type: Host
+        file: "{{ 'conf.d/' + ansible_facts['hostname'] + '.conf' }}"
+        address: "{{ ansible_host }}"
+        check_command: hostalive
+        check_interval: 3m
+      - ...
 ```
+
+This way you can use some host's variables (like `ansible_host`) to deploy configuration on another host (in this case `host.example.org`).
+
+You can use this variant within a playbook where `host.example.org` is your central Icinga 2 instance. Run it on all agents. They will collect their local facts and the central system `host.example.org` will receive host objects for each agent. This approach will only work if you run the play simultanously on your agents and on your central system.
+
+```
+- hosts: icinga2_main:icinga2_agents
+  collections:
+    - netways.icinga
+  pre_tasks:
+    # This assumes that agents don't have 'icinga2_objects' defined at hostvars level
+    # 'set_fact' will override them!
+    - name: Add agent hosts to Icinga 2 objects
+      when: inventory_hostname in groups["icinga2_agents"]
+      set_fact:
+        icinga2_objects:
+          # Name of the central system on which to deploy the given objects
+          host.example.org:
+            - name: "{{ inventory_hostname }}"
+              type: Zone
+              file: "zones.d/{{ monitoring_zone }}/hosts/{{ inventory_hostname }}.conf"
+              endpoints:
+                - "{{ inventory_hostname }}"
+              parent: "{{ monitoring_zone }}"
+            - name: "{{ inventory_hostname }}"
+              type: Endpoint
+              file: "zones.d/{{ monitoring_zone }}/hosts/{{ inventory_hostname }}.conf"
+            - name: "{{ inventory_hostname }}"
+              type: Host
+              file: "zones.d/{{ monitoring_zone }}/hosts/{{ inventory_hostname }}.conf"
+              imports:
+                - linux-host
+              vars:
+                distro: "{{ ansible_facts['distribution'] }}"
+                distroversion: "{{ ansible_facts['distribution_version'] }}"
+                arch: "{{ ansible_facts['architecture'] }}"
+              address: "{{ ansible_facts['default_ipv4']['address'] }}"
+  roles:
+    - netways.icinga.icinga2
+```
+
+> You could also add `icinga2_objects` to your agents's host variables within your inventory instead.
+Example defining the variable within hostvars as a list (inventory entry):
+
+```yaml
+webserver.example.org:
+  ansible_host: 10.0.0.8
+  icinga2_objects:
+    - name: "web-api-user"
+      type: ApiUser
+      file: "{{ 'conf.d/' + ansible_facts['hostname'] + '.conf' }}"
+      password: "somepassword"
+      permissions:
+        - "objects/query/Host"
+        - "objects/query/Service"
+    - ...
+```
+
+In the above case the list `icinga2_objects` will only be deployed as configuration on host `webserver.example.org`.
+
+Additionally, the list `icinga2_objects` from within a play's `vars` key will be merged with each host's individual objects.
+
+### Icinga2 Objects in Play Vars
+
+If you need to deploy certain Icinga 2 objects on every host in your play, you can define the variable `icinga2_objects` as a list within your play's `vars` key.<br>
+This ensures that, **in addition** to the individual host's objects, there is a common set of objects between your hosts.
+
+Example defining the variable within your play's vars:
+
+```yaml
 icinga2_objects:
-  host.example.org:
-    - name: "{{ ansible_fqdn }}"
-      type: Endpoint
-      file: "{{ 'conf.d/' + ansible_hostname + '.conf' }}"
-      order: 20
-    - name: "{{ ansible_fqdn }}"
-      type: Zone
-      file: "{{ 'conf.d/' + ansible_hostname + '.conf' }}"
-      order: 20
-      endpoints:
-        - "{{ ansible_fqdn }}"
-      parent: main
-```
-
-The advantage of the default **icinga2_objects** variable is, that you can run your playbook over many different server without deploying the
-monitoring configuration on every host in the playbook. Otherwise the variable should be only placed in `host_vars` files to restrict deployment on every host.
-
-As a secondary option, you can use the variable without the second level like the following example.
-
-> **CAUTION!** If not restricted it will be deployed on every host. This should be only defined in `host_vars` unless
-you know what you are doing!
-
-```
-icinga2_objects:
-  - name: "{{ ansible_fqdn }}"
-    type: Endpoint
-    file: "{{ 'conf.d/' + ansible_hostname + '.conf' }}"
+  - name: "GlobalApiUser"
+    type: ApiUser
+    file: "conf.d/global_api_users.conf"
     order: 20
+    password: supersecrectpassword123
+    permissions:
+      - "objects/query/Host"
+      - "objects/query/Service"
 ```
 
-More Examples at the end -> [Examples](#examples)
+---
+
+More examples at the end -> [Examples](#examples)
 
 ## Managing Config directories
 
 To create or prepare the directories for the monitoring configuration use the variable `icinga2_config_directories`.
 Those directories are only managed when they are part of `zones.d`, `conf.d` or the variable `icinga2_confd`.
 
-```
+```yaml
 icinga2_config_directories:
   - zones.d/main/hosts/
   - zones.d/main/services/
@@ -69,7 +143,7 @@ Ansible controller node and let the role deploy the file to your instance.
 
 Create the custom file below an Ansible **files/** directory and use the variable **icinga2_custom_config**
 
-```
+```yaml
 icinga2_custom_config:
   - name: myown_command.conf
     path: zones.d/main/myown_command.conf
@@ -86,7 +160,7 @@ The parser takes every value in the configuration and decides how the value shou
 
 First of all, to disable the parser use the prefix `-:`.
 
-```
+```yaml
 attr: -:"unparsed quoted string"
 ```
 
@@ -94,7 +168,7 @@ Strings are parsed in chunks, by splitting the original string into separate sub
 
 **NOTICE:** This splitting only works for keywords that are surrounded by whitespace, e.g.:
 
-```
+```yaml
 attr: string1 + string2 - string3
 ```
 
@@ -102,25 +176,25 @@ The algorithm will loop over the parameter and start by splitting it into 'strin
 
 Brackets are parsed for expressions:
 
-```
+```yaml
 attr: 3 * (value1 -  value2) / 2
 ```
 
 The parser also detects function calls and will parse all parameters separately.
 
-```
+```yaml
 attr: function(param1, param2, ...)
 ```
 
 Boolean values can be defined with or without quotes. In addition the Ansible bool types `yes` or `no` can be used either.
 
-```
+```python
 attr: true or attr: 'true'
 ```
 
 To avoid overlapping syntax with Ansible variable syntax, please refer to single quotes `' '` when using own lambda functions in Icinga.
 
-```
+```jinja
 attrs => '{{ ... }}'
 ```
 
@@ -138,24 +212,24 @@ In general all values can be defined without quotes except for lamba functions w
 To replicate Icinga 2 advanced syntax like assignments with `+=` or `-=` you can use the prefix `+` or `-`.
 
 To create the following Icinga 2 DSL syntax,
-```
+```python
 var += config
 ```
 simply use a string with the prefix `+` e.g.
 
-```
+```yaml
 var: `+ config`
 ```
 
 Because of the blank between the `+` and `config` those values are separately parsed and therefore numbers are also possible. For numbers we also can build `-=`, just use the minus sign `-`. This method will work for every attribute or custom attribute.
 
-```
+```python
 attr: + -14 or attr: - -14
 ```
 
 The parser is able to merge or reduce an array. For this method set the first item of your array as `+` or `-` sign.
 
-```
+```yaml
 attr:
   - +
   - item1
@@ -170,7 +244,7 @@ To reduce arrays use the minus sign `-`.
 
 **NOTICE** Please be aware that the minus sign needs to be quoted otherwise the Ansible parser will have troubles reading the array.
 
-```
+```yaml
 attr:
   - '-'
   - item1
@@ -186,7 +260,7 @@ Result in Icinga will be `attr -= [ "item1", "item2", ]`.
 
 To merge dictionaries we can use the plus sign `+`. The plus sign needs to be a key in the dictionary. See following example.
 
-```
+```yaml
 attr:
   +: true
   key1: value1
@@ -194,13 +268,13 @@ attr:
 
 The result:
 
-```
+```ini
 attr["key1"] = "value1"
 ```
 
 The useage of levels in dictionaries aren't limited.
 
-```
+```yaml
 attr:
   key1:
     key2:
@@ -211,7 +285,7 @@ attr:
 
 Result:
 
-```
+```ini
 vars.attr["key1"] = {
     key2 = {
       key3 += {
@@ -225,7 +299,7 @@ vars.attr["key1"] = {
 
 #### Host Template
 
-```
+```yaml
 icinga2_objects:
 [...]
     - name: generic-host
@@ -238,7 +312,7 @@ icinga2_objects:
 
 #### Host
 
-```
+```yaml
 icinga2_objects:
   host.example.org:
     - name: agent.example.org
@@ -256,7 +330,7 @@ icinga2_objects:
 
 #### Host Group
 
-```
+```yaml
 icinga2_objects:
 [...]
     - name: linux-host
@@ -269,7 +343,7 @@ icinga2_objects:
 
 #### Service Template
 
-```
+```yaml
 icinga2_objects:
 [...]
     - name: generic-service
@@ -283,7 +357,7 @@ icinga2_objects:
 
 #### Service Apply
 
-```
+```yaml
 icinga2_objects:
 [...]
   - name: ping
@@ -300,7 +374,7 @@ icinga2_objects:
 
 #### Service Apply for
 
-```
+```yaml
 [...]
   - name: ping
     type: Service
@@ -308,11 +382,13 @@ icinga2_objects:
     apply_for: config in host.vars.ips
     check_command: ping4
     vars: + config
+    assign:
+      - host.vars.ips
 ```
 
 #### Service Object
 
-```
+```yaml
 icinga2_objects:
 [...]
   - name: ping6
@@ -326,7 +402,7 @@ icinga2_objects:
 
 #### Service Group
 
-```
+```yaml
 icinga2_objects:
 [...]
   - name: service_group_linux
@@ -339,7 +415,7 @@ icinga2_objects:
 
 #### ApiUser
 
-```
+```yaml
 icinga2_objects:
 [...]
   - name: icinga-api
@@ -349,12 +425,11 @@ icinga2_objects:
     permissions:
       - "objects/query/Host"
       - "objects/query/Service"
-
 ```
 
 #### TimePeriod
 
-```
+```yaml
 icinga2_objects:
 [...]
 - name: 24x7
@@ -370,7 +445,7 @@ icinga2_objects:
 
 #### Endpoint
 
-```
+```yaml
 icinga2_objects:
 [...]
   - name: agent.localdomain
@@ -381,7 +456,7 @@ icinga2_objects:
 
 #### Zone
 
-```
+```yaml
 icinga2_objects:
 [...]
   - name: agent.localdomain
@@ -393,7 +468,7 @@ icinga2_objects:
 
 #### ScheduledDowntime
 
-```
+```yaml
 icinga2_objects:
 [...]
   - name: webserver_downtime
@@ -410,7 +485,7 @@ icinga2_objects:
 
 #### Notification Template
 
-```
+```yaml
 icinga2_objects:
 [...]
   - name: notification-template
@@ -422,7 +497,7 @@ icinga2_objects:
 
 #### Notification
 
-```
+```yaml
 icinga2_objects:
 [...]
   - name: notification-to-rhel-host
@@ -441,21 +516,21 @@ icinga2_objects:
 
 #### User
 
- ```
- [...]
-   - name: admin
-     type: User
-     period: "24x7"
-     groups: [ administrators ]
-     email: "icinga@localhost"
-     states: [ OK, Warning, Critical, Unknown ]
-     types: [ Problem, Recovery ]
-     file: zones.d/main/users.conf
- ```
+```yaml
+[...]
+  - name: admin
+    type: User
+    period: "24x7"
+    groups: [ administrators ]
+    email: "icinga@localhost"
+    states: [ OK, Warning, Critical, Unknown ]
+    types: [ Problem, Recovery ]
+    file: zones.d/main/users.conf
+```
 
 #### NotificationCommand
 
-```
+```yaml
 icinga2_objects:
 [...]
   - name: service-notification-command
@@ -475,11 +550,11 @@ icinga2_objects:
       notification_address: $address$
       notification_address6: $address6$
       notification_author: $notification.author$
-````
+```
 
 #### UserGroup
 
-```
+```yaml
 [...]
   - name: administrators
     type: UserGroup
@@ -489,7 +564,7 @@ icinga2_objects:
 
 #### CheckCommand
 
-```
+```yaml
 icinga2_objects:
 [...]
   - name: http
@@ -502,9 +577,21 @@ icinga2_objects:
         set_if: $http_ssl$
 ```
 
+#### CompatLogger
+
+```yaml
+icinga2_objects:
+[...]
+  - name: mycompatlogger
+    type: CompatLogger
+    file: "local.d/complog.conf"
+    log_dir: "LogDir + /custom_complog"
+    rotation_method: "hourly"
+```
+
 #### Dependency
 
-```
+```yaml
 - name: dependency-to-host
   type: Dependency
   apply: true
@@ -521,7 +608,7 @@ icinga2_objects:
 
 #### EventCommand
 
-```
+```yaml
 - name: restart-httpd-event
   type: EventCommand
   file: zones.d/main/eventcommands.conf

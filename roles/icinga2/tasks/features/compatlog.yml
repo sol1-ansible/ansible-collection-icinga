@@ -1,0 +1,12 @@
+---
+
+- name: Feature compatlog CompatLogger object
+  ansible.builtin.set_fact:
+    tmp_objects: "{{ tmp_objects | default([]) + objects }}"
+  vars:
+    objects:
+      - name: compatlog
+        type: CompatLogger
+        file: features-available/compatlog.conf
+        args: "{{ icinga2_dict_features.compatlog }}"
+  register: result

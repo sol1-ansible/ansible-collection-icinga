@@ -11,6 +11,7 @@ Current supported features:
 
 * [Feature API](features/feature-api.md)
 * [Feature Command](features/feature-command.md)
+* [Feature CompatLog](features/feature-compatlog.md)
 * [Feature ElasticSearch](features/feature-elasticsearch.md)
 * [Feature GelfWriter](features/feature-gelf.md)
 * [Feature Graphite](features/feature-graphite.md)
@@ -21,9 +22,10 @@ Current supported features:
 * [Feature Livestatus](features/feature-livestatus.md)
 * [Feature mainlog](features/feature-mainlog.md)
 * [Feature notification](features/feature-notification.md)
+* [Feature OTLPMetrics](features/feature-otlpmetrics.md)
 * [Feature perfdata](features/feature-perfdata.md)
 
-```
+```yaml
 icinga2_features:
   - name: checker
   - name: mainlog

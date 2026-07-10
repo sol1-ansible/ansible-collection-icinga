@@ -1,22 +1,24 @@
 ---
+- ansible.builtin.gather_facts:
+
 - name: Include OS specific vars
-  include_vars: "{{ lookup('first_found', params) }}"
+  ansible.builtin.include_vars: "{{ lookup('first_found', params) }}"
   vars:
     params:
       files:
-        - "{{ ansible_os_family }}-{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml"
-        - "{{ ansible_os_family }}-{{ ansible_distribution_major_version }}.yml"
-        - "{{ ansible_os_family }}-{{ ansible_distribution }}.yml"
-        - "{{ ansible_os_family }}.yml"
+        - "{{ ansible_facts['os_family'] }}-{{ ansible_facts['distribution'] }}-{{ ansible_facts['distribution_major_version'] }}.yml"
+        - "{{ ansible_facts['os_family'] }}-{{ ansible_facts['distribution_major_version'] }}.yml"
+        - "{{ ansible_facts['os_family'] }}-{{ ansible_facts['distribution'] }}.yml"
+        - "{{ ansible_facts['os_family'] }}.yml"
         - default.yml
       paths:
         - "{{ role_path }}/vars"
 
-- name: Install Icinga
-  include_tasks: install.yml
+- name: Install
+  ansible.builtin.include_tasks: install.yml
 
 - name: Configure
-  include_tasks: configure.yml
+  ansible.builtin.include_tasks: configure.yml
 
-- name: manage service
-  include_tasks: service.yml
+- name: Manage service
+  ansible.builtin.include_tasks: service.yml

@@ -1,4 +1,4 @@
-# {{ ansible_managed }}
+{{ ansible_managed | comment }}
 
 database:
 {% if icingadb_database_type is defined %}
@@ -24,13 +24,15 @@ database:
   ca: {{ icingadb_database_ca }}
 {% endif %}
 {% if icingadb_database_tls_insecure is defined %}
-  insecure: {{ icingadb_database_insecure }}
+  insecure: {{ icingadb_database_tls_insecure }}
 {% endif %}
 
 
 redis:
   host: {{ icingadb_redis_host }}
-{% if icingadb_redis_port is defined %}
+{% if icingadb_redis_tls is defined %}
+  port: {{ icingadb_redis_tls_port | default(icingadb_redis_port) }}
+{% else %}
   port: {{ icingadb_redis_port }}
 {% endif %}
 {% if icingadb_redis_password is defined %}

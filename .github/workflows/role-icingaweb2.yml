@@ -26,7 +26,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      COLLECTION_NAMESPACE: icinga
+      COLLECTION_NAMESPACE: netways
       COLLECTION_NAME: icinga
 
     strategy:
@@ -34,16 +34,16 @@ jobs:
       max-parallel: 1
       matrix:
         distro: [ubuntu2204]
-        python: ['3.10']
-        ansible: ['2.16.2']
+        python: ['3.12']
+        ansible: ['2.17']
         scenario: [role-icingaweb2]
 
     steps:
       - name: Check out code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python }}
 

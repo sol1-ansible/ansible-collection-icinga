@@ -77,6 +77,7 @@ icinga2_object_types:
   - ApiUser
   - CheckCommand
   - CheckerComponent
+  - CompatLogger
   - Dependency
   - ElasticsearchWriter
   - Endpoint
@@ -98,6 +99,7 @@ icinga2_object_types:
   - NotificationComponent
   - LivestatusListener
   - OpenTsdbWriter
+  - OTLPMetricsWriter
   - PerfdataWriter
   - ScheduledDowntime
   - Service
