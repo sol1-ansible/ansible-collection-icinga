@@ -64,13 +64,15 @@
     loop_var: idx
   register: result
 
-- set_fact:
-    icinga2_local_objects: "{{ icinga2_local_objects|default([]) + [idx.dest] }}"
-  loop: "{{ result.results }}"
-  loop_control:
-    loop_var: idx
+# - name: Set icinga2_local_objects
+#   ansible.builtin.set_fact:
+#     icinga2_local_objects: "{{ icinga2_local_objects|default([]) + [idx.dest] }}"
+#   loop: "{{ result.results }}"
+#   loop_control:
+#     loop_var: idx
 
-- set_fact:
+- name: Set combined hostnames
+  ansible.builtin.set_fact:
     combined_hostnames: "{{ combined_hostnames | default([]) + [hostvars[item].inventory_hostname] | flatten}}"
   with_items: "{{ ansible_play_hosts_all }}"
   run_once: true
