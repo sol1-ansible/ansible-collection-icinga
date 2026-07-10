@@ -89,19 +89,25 @@
       ansible.builtin.stat:
         path: "{{ icinga2_ca_path }}/ca.key"
       register: icinga2_ca_key_path
+      delegate_to: "{{ groups['dynamic_icinga_headend_group'][0] }}"
 
     - name: Check ca cert already exists
       ansible.builtin.stat:
         path: "{{ icinga2_ca_path }}/ca.crt"
       register: icinga2_ca_cert_path
+      delegate_to: "{{ groups['dynamic_icinga_headend_group'][0] }}"
 
     - name: Create CA
       ansible.builtin.shell: >
         icinga2 pki new-ca
       delegate_to: "{{ groups['dynamic_icinga_headend_group'][0] }}"
-      when: icinga2_ca_cert_path.stat.exists == false and icinga2_ca_key_path.stat.exists == false
-  when: icinga2_ca_host is defined and icinga2_ca_host == 'none'
-  run_once: true
+      when:
+        - not icinga2_ca_cert_path.stat.exists
+        - not icinga2_ca_key_path.stat.exists
+  when:
+    - icinga2_ca_host is defined
+    - icinga2_ca_host == 'none'
+    - inventory_hostname == groups['dynamic_icinga_headend_group'][0]
 
 - name: Create HA Headends
   block:
