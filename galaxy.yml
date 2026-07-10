@@ -1,6 +1,6 @@
 ---
 
-namespace: icinga
+namespace: netways
 name: icinga
 version: 0.4.9
 readme: README.md
