@@ -17,6 +17,13 @@ class ActionModule(ActionBase):
         arguments = dict()
         arguments = self._task.args.copy()
 
+        if 'objects' not in arguments:
+            raise AnsibleError("icinga2_object requires the 'objects' argument")
+        if not isinstance(arguments['objects'], list):
+            raise AnsibleError(
+                "'objects' must be a list, got %s" % type(arguments['objects']).__name__
+            )
+
         # Create dict to bundle objects that will end up in the same file
         destinations = dict()
 
@@ -32,24 +39,59 @@ class ActionModule(ActionBase):
             args = merge_hash(args.pop('args', {}), args)
             object_type = args.pop('type', None)
 
+            # Identify the object for error messages (name may live in args)
+            object_ident = args.get('name', '<unnamed>')
+
+            if object_type is None:
+                raise AnsibleError(
+                    "Icinga object is missing required key 'type' (object: %s)" % object_ident
+                )
+
             if object_type not in task_vars['icinga2_object_types']:
-                raise AnsibleError('unknown Icinga object type: %s' % object_type)
+                raise AnsibleError(
+                    "unknown Icinga object type '%s' (object: %s)" % (object_type, object_ident)
+                )
 
             #
             # distribute to object type as module (name: icinga2_type)
             #
             obj = dict()
             obj = self._execute_module(
-                module_name='icinga2_'+object_type.lower(),
+                module_name='icinga2_' + object_type.lower(),
                 module_args=args,
                 task_vars=task_vars,
                 tmp=tmp
             )
 
-            if 'failed' in obj:
-                raise AnsibleError('Call to module failed: %s' % obj['msg'])
-            if 'skipped' in obj and obj['skipped']:
-                raise AnsibleError('Call to module was skipped: %s' % obj['msg'])
+            if not isinstance(obj, dict):
+                raise AnsibleError(
+                    "Module icinga2_%s returned no usable result for object '%s'"
+                    % (object_type.lower(), object_ident)
+                )
+
+            if obj.get('failed'):
+                raise AnsibleError(
+                    "Module icinga2_%s failed for object '%s': %s"
+                    % (object_type.lower(), object_ident,
+                       obj.get('msg', obj.get('exception', 'no message returned')))
+                )
+            if obj.get('skipped'):
+                raise AnsibleError(
+                    "Module icinga2_%s skipped object '%s': %s"
+                    % (object_type.lower(), object_ident,
+                       obj.get('msg', 'no message returned'))
+                )
+
+            #
+            # validate keys the plugin relies on downstream
+            #
+            missing = [k for k in ('file', 'name', 'state') if k not in obj]
+            if missing:
+                raise AnsibleError(
+                    "Object '%s' (type %s) is missing required key(s) %s in the module result. "
+                    "Each object needs a top-level 'file' and 'name'."
+                    % (object_ident, object_type, ', '.join(missing))
+                )
 
             #
             # file path handling for assemble
@@ -116,8 +158,6 @@ class ActionModule(ActionBase):
                 #
                 object_content += Icinga2Parser().parse(obj['args'], list(task_vars['icinga2_combined_constants'].keys())+task_vars['icinga2_reserved']+varlist+list(obj['args'].keys()), 2) + '}\n'
                 destinations[path] += [object_content]
-
-
 
         for destination, objects in destinations.items():
             # Remove duplicate entries and sort list to ensure idempotency
