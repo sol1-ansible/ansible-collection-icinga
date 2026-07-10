@@ -16,6 +16,7 @@
     group: root
     mode: '0644'
     force: true
+    validate_certs: false
 
 - name: Apt - add Icinga repository
   ansible.builtin.deb822_repository:
