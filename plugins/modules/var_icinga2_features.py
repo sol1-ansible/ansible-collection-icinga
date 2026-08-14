@@ -78,6 +78,8 @@ def build_icinga2_endpoints(endpoint_zones):
     _endpoints = []
     for endpoint_zone in endpoint_zones:
         for key, endpoint in endpoint_zone.items():
+            if not isinstance(endpoint, dict):
+                continue            
             if 'name' in endpoint:
                 _endpoint = {
                     'name': endpoint['name']
@@ -95,6 +97,8 @@ def build_icinga2_endpoints(endpoint_zones):
 def build_icinga2_endpoint_zone(endpoints, zone, parent_zone = ""):
     _endpoints = []
     for key, endpoint in endpoints.items():
+        if not isinstance(endpoint, dict):
+                continue            
         if 'name' in endpoint:
             _endpoints.append(endpoint['name'])
     zone = {
@@ -138,7 +142,10 @@ def build_icinga2_api(parent_endpoints, my_endpoints, global_zones, common_name)
     if common_name:
         api['cert_name'] = common_name
     if parent_endpoints:
-        api['ca_host'] = parent_endpoints[next(iter(parent_endpoints))].get('address', 'none')
+        for key, endpoint in parent_endpoints.items():
+            if isinstance(endpoint, dict) and 'address' in endpoint:
+                api['ca_host'] = endpoint['address']
+                break
     return api
 
 def build_icinga2_notification(endpoints):
@@ -146,6 +153,8 @@ def build_icinga2_notification(endpoints):
         'name': 'notification'
     }
     for key, endpoint in endpoints.items():
+        if not isinstance(endpoint, dict):
+            continue
         # we are HA
         if str(key).endswith('2'):
             notification['enable_ha'] = True
