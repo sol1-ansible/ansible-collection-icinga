@@ -3,6 +3,11 @@
   set_fact:
     icinga2_confd: "local.d"
 
+- name: Set Default icinga_endpoint_common_name
+  set_fact:
+    icinga_endpoint_common_name: "{{ inventory_hostname }}"
+  when: icinga_endpoint_common_name is not defined
+
 - name: Set Default icinga2_config_directories
   set_fact:
     icinga2_config_directories: "{{ [icinga2_confd + '/'] }}"
@@ -30,7 +35,7 @@
     my_endpoints: "{{ icinga_zone_vars['endpoints'] }}"
     config_directories: "{{ icinga2_config_global_zones }}"
     features: "{{ icinga_zone_var_endpoint_features }}"
-    common_name: "{{ inventory_hostname }}"
+    common_name: "{{ icinga_endpoint_common_name }}"
   register: _icinga2_features
   
 - name: merge default _icinga2_features with any userset icinga2_features
@@ -40,7 +45,7 @@
 - name: Set default icinga2_constants
   set_fact:
     icinga2_constants: 
-      NodeName: "{{ inventory_hostname }}"
+      NodeName: "{{ icinga_endpoint_common_name }}"
       ZoneName: "{{ icinga_zone_vars.endpoints.zone }}"
   when:
     - icinga_zone_vars is defined
